@@ -1,1117 +1,864 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; style-src 'unsafe-inline' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; img-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data:; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<title>Ai Chain Terminal</title>
-<style>:root{color-scheme:light dark;background:light-dark(rgb(255 255 255), rgb(24 24 24))}html,body{margin:0}body{box-sizing:border-box;padding:1rem;background:inherit}iframe{display:block;width:100%;max-width:736px;height:calc(100vh - 2rem);margin:0 auto;border:0}</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0a1929" />
+  <meta name="description" content="AI 产业链信号、供应链、财报、资金、组合与交易时点 PM 工作台" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="AI 产业链 · 投研工作台" />
+  <meta property="og:description" content="AI 产业链信号、供应链、财报、资金、组合与交易时点 PM 工作台" />
+  <meta property="og:image" content="og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <title>AI 产业链投研工作台 Dashboard v2</title>
+  <style>
+:root {
+  --bg: #0a1929;
+  --bg-deep: #061523;
+  --panel: #12293f;
+  --panel-2: #16344f;
+  --panel-3: #0e2438;
+  --line: #23445e;
+  --line-soft: #19384f;
+  --text: #e7f0f7;
+  --muted: #88a0b2;
+  --blue: #60a5fa;
+  --green: #22c55e;
+  --red: #ef4444;
+  --orange: #f59e0b;
+  --observe: #3b82f6;
+  --shadow: rgba(0,0,0,.38);
+  --sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --mono: "SFMono-Regular", "Cascadia Code", "Roboto Mono", Consolas, monospace;
+}
+:root[data-theme="light"] {
+  --bg: #edf3f7; --bg-deep: #e1eaf0; --panel: #ffffff; --panel-2: #f2f7fa; --panel-3: #f7fafc;
+  --line: #c7d7e2; --line-soft: #dce7ee; --text: #102536; --muted: #61798b; --blue: #2477d4;
+  --green: #078956; --red: #d1384a; --orange: #b86b10; --observe: #256fc7; --shadow: rgba(21,49,70,.12);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 58px; }
+body { margin: 0; min-width: 320px; background: var(--bg-deep); color: var(--text); font-family: var(--sans); font-size: 12px; }
+button, input, select { font: inherit; }
+button { color: inherit; }
+a { color: inherit; }
+::selection { background: color-mix(in srgb, var(--blue) 32%, transparent); }
+.hidden { display: none !important; }
+.mono { font-family: var(--mono); }
+.app { min-height: 100vh; background: radial-gradient(circle at 58% 0, color-mix(in srgb, var(--blue) 8%, transparent), transparent 34%), var(--bg-deep); }
+
+.topbar { position: sticky; top: 0; z-index: 60; height: 52px; display: grid; grid-template-columns: auto auto auto 1fr minmax(230px,330px) auto; align-items: center; gap: 10px; padding: 0 14px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg-deep) 95%, transparent); box-shadow: 0 8px 25px var(--shadow); backdrop-filter: blur(14px); }
+.brand { display: flex; align-items: center; gap: 8px; border: 0; background: none; padding: 0; cursor: pointer; text-align: left; }
+.brand-mark { width: 27px; height: 27px; border-radius: 5px; display: grid; place-items: center; color: #071421; background: linear-gradient(145deg,#4ade80,#60a5fa); font: 800 12px var(--mono); box-shadow: 0 0 18px color-mix(in srgb,var(--blue) 35%,transparent); }
+.brand strong { display: block; font-size: 12px; letter-spacing: .02em; }
+.brand small { display: block; color: var(--muted); font: 7px var(--mono); letter-spacing: .08em; margin-top: 1px; }
+.live-pill { height: 27px; display: flex; align-items: center; gap: 6px; padding: 0 8px; border: 1px solid color-mix(in srgb,var(--green) 36%,var(--line)); background: color-mix(in srgb,var(--green) 7%,var(--panel)); color: var(--green); font: 9px var(--mono); white-space: nowrap; }
+.live-pill i { width: 5px; height: 5px; background: var(--green); border-radius: 50%; animation: pulse 1.7s infinite; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 color-mix(in srgb,var(--green) 35%,transparent); } 50% { box-shadow: 0 0 0 5px transparent; } }
+.snapshot-control { height: 29px; display: flex; align-items: center; gap: 5px; border: 1px solid var(--line); background: var(--panel); padding: 0 7px; white-space: nowrap; }
+.snapshot-control span { color: var(--muted); font-size: 10px; }
+.snapshot-control select { border: 0; outline: 0; color: var(--text); background: transparent; font: 9px var(--mono); max-width: 138px; }
+.main-tabs { display: flex; align-items: stretch; height: 100%; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.main-tabs::-webkit-scrollbar { display: none; }
+.main-tabs button { border: 0; border-bottom: 2px solid transparent; background: transparent; padding: 0 10px; color: var(--muted); font-size: 10px; cursor: pointer; white-space: nowrap; }
+.main-tabs button:hover { color: var(--text); background: color-mix(in srgb,var(--panel) 55%,transparent); }
+.main-tabs button.active { color: var(--blue); border-color: var(--blue); background: color-mix(in srgb,var(--blue) 7%,transparent); box-shadow: inset 0 -10px 18px color-mix(in srgb,var(--blue) 5%,transparent); }
+.search { position: relative; height: 30px; border: 1px solid var(--line); background: var(--panel); display: flex; align-items: center; gap: 6px; padding: 0 8px; }
+.search > span { color: var(--muted); font-size: 14px; }
+.search input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--text); font-size: 9px; }
+.search kbd { color: var(--muted); border: 1px solid var(--line); padding: 2px 4px; font: 7px var(--mono); }
+.search-results { position: absolute; top: 35px; left: -1px; right: -1px; border: 1px solid var(--line); background: var(--panel); box-shadow: 0 18px 40px var(--shadow); padding: 5px; z-index: 90; }
+.search-results button { width: 100%; display: grid; grid-template-columns: 54px 1fr auto; gap: 7px; align-items: center; border: 0; background: transparent; padding: 8px; text-align: left; cursor: pointer; }
+.search-results button:hover { background: var(--panel-2); }
+.search-results b { color: var(--blue); font: 10px var(--mono); }
+.search-results span { color: var(--muted); font-size: 9px; }
+.search-results em { color: var(--green); font: 8px var(--mono); font-style: normal; }
+.icon-btn { width: 30px; height: 30px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); cursor: pointer; }
+.icon-btn:hover { color: var(--orange); border-color: var(--orange); }
+
+.snapshot-banner { min-height: 32px; display: flex; align-items: center; gap: 12px; padding: 5px 16px; border-bottom: 1px solid color-mix(in srgb,var(--orange) 42%,var(--line)); background: color-mix(in srgb,var(--orange) 8%,var(--panel)); color: var(--muted); font-size: 9px; }
+.snapshot-banner b { color: var(--orange); font: 9px var(--mono); }
+.snapshot-banner button { margin-left: auto; border: 1px solid var(--line); background: transparent; color: var(--text); padding: 4px 8px; cursor: pointer; }
+.screen { display: none; }
+.screen.active { display: block; }
+
+.workspace { max-width: 1660px; margin: 0 auto; display: grid; grid-template-columns: 230px minmax(0,1fr); }
+.toc { position: sticky; top: 52px; height: calc(100vh - 52px); overflow-y: auto; border-right: 1px solid var(--line); background: color-mix(in srgb,var(--bg) 80%,transparent); padding: 12px 10px 75px; scrollbar-width: thin; }
+.toc-head { display: flex; justify-content: space-between; align-items: center; padding: 3px 7px 11px; border-bottom: 1px solid var(--line); }
+.toc-head strong { font-size: 10px; }
+.toc-head span { color: var(--muted); font: 7px var(--mono); }
+.toc-group { margin: 12px 0 4px; color: var(--muted); font: 7px var(--mono); letter-spacing: .12em; text-transform: uppercase; padding: 0 7px; }
+.toc a { display: grid; grid-template-columns: 26px 1fr; align-items: center; min-height: 29px; padding: 4px 7px; border-left: 2px solid transparent; color: var(--muted); text-decoration: none; font-size: 8px; line-height: 1.25; border-radius: 3px; }
+.toc a span { display: grid; place-items: center; width: 20px; height: 17px; border-radius: 3px; background: var(--panel); color: var(--blue); font: 7px var(--mono); }
+.toc a:hover,.toc a.active { color: var(--text); background: var(--panel-2); border-color: var(--blue); }
+.overview-main { min-width: 0; padding: 10px 12px 70px; }
+.module { scroll-margin-top: 62px; margin-bottom: 10px; }
+.card { min-width: 0; border: 1px solid var(--line); border-radius: 7px; background: linear-gradient(145deg,var(--panel),color-mix(in srgb,var(--panel-2) 66%,var(--panel))); box-shadow: 0 5px 18px color-mix(in srgb,var(--shadow) 45%,transparent); overflow: hidden; }
+.card.clickable { cursor: pointer; transition: border-color .16s, transform .16s; }
+.card.clickable:hover { border-color: color-mix(in srgb,var(--blue) 55%,var(--line)); transform: translateY(-1px); }
+.card-head { min-height: 37px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 12px; border-bottom: 1px solid var(--line-soft); }
+.card-head h2 { margin: 0; font-size: 10px; letter-spacing: .02em; }
+.card-head .meta { display: flex; align-items: center; gap: 7px; color: var(--muted); font: 7px var(--mono); }
+.card-intro { margin: 8px 12px 0; color: var(--muted); font-size: 8px; line-height: 1.6; }
+.grid { display: grid; gap: 10px; }
+.grid-2 { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.grid-3 { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.grid-4 { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.split-65 { grid-template-columns: minmax(0,1.45fr) minmax(330px,.75fr); }
+.badge { display: inline-flex; align-items: center; justify-content: center; min-height: 18px; padding: 2px 7px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); color: var(--muted); font: 7px var(--mono); font-style: normal; white-space: nowrap; }
+.badge.good { color: var(--green); border-color: color-mix(in srgb,var(--green) 38%,var(--line)); background: color-mix(in srgb,var(--green) 9%,var(--panel)); }
+.badge.bad { color: var(--red); border-color: color-mix(in srgb,var(--red) 38%,var(--line)); background: color-mix(in srgb,var(--red) 9%,var(--panel)); }
+.badge.rumor,.badge.observe { color: var(--orange); border-color: color-mix(in srgb,var(--orange) 38%,var(--line)); background: color-mix(in srgb,var(--orange) 9%,var(--panel)); }
+.badge.neutral { color: var(--blue); border-color: color-mix(in srgb,var(--blue) 38%,var(--line)); }
+.cred { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font: 7px var(--mono); }
+.cred::before { content:""; width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
+.cred.mid::before { background: var(--orange); }
+.cred.low::before { background: var(--red); }
+.hint { border: 1px solid var(--line); background: transparent; color: var(--muted); padding: 3px 6px; border-radius: 999px; font: 7px var(--mono); cursor: pointer; }
+.hint:hover { color: var(--blue); border-color: var(--blue); }
+.source { color: var(--blue); text-decoration: none; font: 7px var(--mono); }
+.source:hover { text-decoration: underline; }
+
+.kpi-shell { padding: 8px 10px 10px; }
+.filters { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+.filters button { border: 1px solid var(--line); border-radius: 4px; padding: 4px 8px; background: transparent; color: var(--muted); font: 7px var(--mono); cursor: pointer; }
+.filters button.active { color: var(--blue); border-color: var(--blue); background: color-mix(in srgb,var(--blue) 8%,var(--panel)); }
+.kpi-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 7px; }
+.kpi { border: 1px solid var(--line-soft); border-left-width: 3px; border-radius: 5px; background: color-mix(in srgb,var(--panel-2) 60%,transparent); padding: 8px; cursor: pointer; text-align: left; }
+.kpi.good { border-left-color: var(--green); }.kpi.neutral { border-left-color: var(--blue); }.kpi.rumor { border-left-color: var(--orange); }.kpi.bad { border-left-color: var(--red); }
+.kpi small { color: var(--muted); font-size: 7px; }.kpi strong { display: block; margin-top: 2px; font: 21px var(--mono); }.kpi.good strong { color: var(--green); }.kpi.rumor strong { color: var(--orange); }.kpi.bad strong { color: var(--red); }
+.spark { width: 100%; height: 30px; margin-top: 3px; overflow: visible; }
+.net-band { margin-top: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid color-mix(in srgb,var(--green) 36%,var(--line)); background: linear-gradient(90deg,color-mix(in srgb,var(--green) 14%,var(--panel)),color-mix(in srgb,var(--blue) 8%,var(--panel))); padding: 10px 12px; cursor: pointer; }
+.net-band small { color: var(--green); font: 7px var(--mono); }.net-band strong { display: block; margin-top: 3px; color: var(--green); font-size: 18px; }.net-band b { color: var(--green); font: 10px var(--mono); }
+.donut-area { min-height: 132px; display: grid; grid-template-columns: 165px 1fr; align-items: center; padding: 8px 12px; }
+.donut { width: 90px; height: 90px; margin: auto; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--green) 0 75%,var(--blue) 75% 82%,var(--orange) 82% 94%,var(--red) 94%); position: relative; cursor: pointer; }
+.donut::after { content:""; width: 58px; height: 58px; border-radius: 50%; background: var(--panel); position: absolute; }
+.donut span { position: relative; z-index: 2; text-align: center; }.donut b { display:block;font:17px var(--mono);}.donut small{color:var(--muted);font:6px var(--mono)}
+.legend p { margin: 0; padding: 5px 0; display: grid; grid-template-columns: 8px 1fr auto; border-bottom: 1px solid var(--line-soft); color: var(--muted); font-size: 8px; }.legend i{width:5px;height:5px;border-radius:50%;background:var(--green);}.legend .n{background:var(--blue)}.legend .o{background:var(--orange)}.legend .r{background:var(--red)}.legend b{font:9px var(--mono);color:var(--text)}
+
+.demand-grid { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 6px; padding: 8px 10px 10px; }
+.demand-grid button { min-width:0;border:1px solid var(--line-soft);border-radius:4px;background:color-mix(in srgb,var(--panel-2) 60%,transparent);color:var(--text);padding:8px;text-align:left;cursor:pointer; }
+.demand-grid button:hover { border-color: var(--green); }.demand-grid small{color:var(--blue);font:7px var(--mono)}.demand-grid strong{display:block;font:18px var(--mono);margin:5px 0 2px}.demand-grid span{display:block;color:var(--muted);font-size:7px;height:19px}.demand-grid em{color:var(--green);font:7px var(--mono);font-style:normal}.demand-grid .spark{height:20px}
+.capex-wrap { display: grid; grid-template-columns: 1fr 180px; padding: 9px 10px 10px; gap: 10px; }
+.capex-row { display:grid;grid-template-columns:88px 1fr 34px;align-items:center;gap:7px;margin:7px 0 }.capex-row label{font:8px var(--mono)}.capex-bars{height:14px;display:flex;gap:2px;background:var(--bg-deep)}.capex-bars i{display:block;height:100%;background:var(--blue)}.capex-bars i:nth-child(2){background:var(--green)}.capex-bars i.est{background:repeating-linear-gradient(135deg,transparent,transparent 3px,color-mix(in srgb,var(--blue) 42%,transparent) 3px,color-mix(in srgb,var(--blue) 42%,transparent) 6px);border:1px dashed var(--blue)}.capex-row b{font:8px var(--mono);text-align:right}.capex-total{border-left:1px solid var(--line);padding:12px;display:flex;flex-direction:column;justify-content:center}.capex-total small{color:var(--muted);font:7px var(--mono)}.capex-total strong{font:24px var(--mono);margin:6px 0;color:var(--blue)}.capex-total span{color:var(--green);font:8px var(--mono)}.legend-line{margin-top:8px;color:var(--muted);font:7px var(--mono);line-height:1.7}.legend-line i{display:inline-block;width:15px;height:6px;margin-right:5px;background:var(--blue)}.legend-line i.est{background:transparent;border:1px dashed var(--blue)}
+
+.chain-strip { display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:8px 10px 10px }.chain-item{border:1px solid var(--line-soft);border-radius:4px;background:color-mix(in srgb,var(--panel-2) 55%,transparent);padding:8px;cursor:pointer;text-align:left}.chain-item:hover{border-color:var(--green)}.chain-item header{display:flex;justify-content:space-between;align-items:center}.chain-item small{color:var(--muted);font:7px var(--mono)}.chain-item strong{display:block;margin:5px 0;font:19px var(--mono);color:var(--green)}.chain-item p{margin:0;color:var(--muted);font-size:7px;line-height:1.45}.chain-item .meter{height:3px;background:var(--line);margin-top:8px}.chain-item .meter i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--green))}
+.logic-wrap { padding:8px 10px 10px }.logic-tabs{display:flex;gap:4px;margin-bottom:7px}.logic-tabs button{border:1px solid var(--line);background:transparent;color:var(--muted);padding:5px 8px;font:7px var(--mono);cursor:pointer}.logic-tabs button.active{border-color:var(--green);color:var(--green);background:color-mix(in srgb,var(--green) 7%,var(--panel))}.logic-columns{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:8px}.logic-list{display:grid;gap:5px}.logic-node{border:1px solid var(--line-soft);border-left:3px solid var(--green);background:color-mix(in srgb,var(--panel-2) 52%,transparent);color:var(--text);padding:7px 9px;cursor:pointer;text-align:left}.logic-node:hover{border-color:var(--blue)}.logic-node header{display:flex;justify-content:space-between}.logic-node b{font-size:9px}.logic-node small{color:var(--muted);font:7px var(--mono)}.logic-node p{margin:4px 0;color:var(--muted);font-size:7px}.logic-node footer{color:var(--blue);font:7px var(--mono)}.priority-node{display:grid;grid-template-columns:20px 1fr auto;gap:7px;align-items:center;border:1px solid var(--line-soft);background:color-mix(in srgb,var(--panel-2) 52%,transparent);color:var(--text);padding:7px 8px;cursor:pointer;text-align:left}.priority-node:hover{border-color:var(--green)}.priority-node>span{color:var(--green);font:11px var(--mono)}.priority-node b{display:block;font-size:8px}.priority-node small{color:var(--muted);font-size:7px}.priority-node em{font:12px var(--mono);color:var(--green);font-style:normal}.priority-node .bar{grid-column:2/-1;height:3px;background:var(--line)}.priority-node .bar i{display:block;height:100%;background:var(--green)}
+.earnings-list{padding:7px 10px 10px}.earning-row{display:grid;grid-template-columns:22px 132px minmax(120px,1fr) 40px;gap:7px;align-items:center;border-bottom:1px solid var(--line-soft);padding:6px 2px;cursor:pointer}.earning-row:hover{background:var(--panel-2)}.earning-row>span{color:var(--muted);font:7px var(--mono)}.earning-row b{font-size:8px}.trend-line{height:25px;position:relative}.trend-line svg{width:100%;height:100%}.earning-row em{font:11px var(--mono);color:var(--green);font-style:normal;text-align:right}
+.company-table,.risk-table,.trade-table{width:100%;border-collapse:collapse}.company-table th,.company-table td,.risk-table th,.risk-table td{padding:6px 8px;border-bottom:1px solid var(--line-soft);text-align:left;font-size:7px}.company-table th,.risk-table th{color:var(--muted);font:7px var(--mono);background:var(--panel-3)}.company-table tbody tr,.risk-table tbody tr{cursor:pointer}.company-table tbody tr:hover,.risk-table tbody tr:hover{background:var(--panel-2)}.company-table td:first-child,.risk-table td:nth-child(2){color:var(--blue);font-family:var(--mono)}
+.etf-list,.allocation-list,.news-list,.feed-list,.watch-list{padding:7px 10px 10px}.list-row{display:grid;grid-template-columns:70px 1fr auto;gap:8px;align-items:center;border-bottom:1px solid var(--line-soft);padding:7px 2px;cursor:pointer}.list-row:hover{background:var(--panel-2)}.list-row>b{color:var(--blue);font:9px var(--mono)}.list-row span strong{display:block;font-size:8px}.list-row span small{color:var(--muted);font-size:7px}.list-row em{font-style:normal;color:var(--green);font:7px var(--mono)}
+.industry-wrap{padding:7px 10px 10px;overflow:auto}.heatmap{min-width:640px;display:grid;grid-template-columns:130px repeat(4,1fr);border-top:1px solid var(--line);border-left:1px solid var(--line)}.heatmap>*{min-height:30px;display:flex;align-items:center;padding:5px 7px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);font-size:7px}.heatmap header{color:var(--muted);font:7px var(--mono);background:var(--panel-3)}.heatmap button{border-top:0;border-left:0;background:transparent;color:var(--text);cursor:pointer;text-align:left}.heatmap .score{justify-content:center;font:9px var(--mono);background:color-mix(in srgb,var(--green) calc(var(--v) * .65%),var(--panel))}.heatmap .tam{color:var(--blue);font:8px var(--mono)}
+.delivery-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:8px 10px 10px}.delivery-item{border:1px solid var(--line-soft);border-left:3px solid var(--muted);padding:8px;background:color-mix(in srgb,var(--panel-2) 50%,transparent)}.delivery-item header{display:flex;justify-content:space-between;gap:6px}.delivery-item b{font-size:8px}.delivery-item p{color:var(--muted);font-size:7px;line-height:1.5}.delivery-item footer{display:flex;justify-content:space-between;color:var(--muted);font:7px var(--mono)}.delivery-status{margin:0 10px 10px;border:1px solid var(--line);padding:7px 9px;display:flex;justify-content:space-between;align-items:center;color:var(--muted)}.delivery-status b{color:var(--orange);font:11px var(--mono)}
+.rumor-map{height:220px;margin:8px 10px 10px;position:relative;border:1px solid var(--line);background-image:linear-gradient(var(--line-soft) 1px,transparent 1px),linear-gradient(90deg,var(--line-soft) 1px,transparent 1px);background-size:25% 25%}.rumor-map::before,.rumor-map::after{content:"";position:absolute;background:var(--line)}.rumor-map::before{left:50%;top:0;bottom:0;width:1px}.rumor-map::after{top:50%;left:0;right:0;height:1px}.rumor-map .axis-x{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);color:var(--muted);font:7px var(--mono)}.rumor-map .axis-y{position:absolute;left:4px;top:50%;transform:translateY(-50%) rotate(-90deg);color:var(--muted);font:7px var(--mono)}.bubble{position:absolute;transform:translate(-50%,-50%);border:1px solid;color:var(--text);border-radius:50%;display:grid;place-items:center;padding:6px;background:color-mix(in srgb,var(--orange) 22%,var(--panel));cursor:pointer;font:7px var(--mono);text-align:center}.bubble.bad{background:color-mix(in srgb,var(--red) 24%,var(--panel));border-color:var(--red)}
+.filter-bar{display:flex;justify-content:space-between;gap:8px;padding:7px 10px;border-bottom:1px solid var(--line-soft)}.filter-bar>div{display:flex;flex-wrap:wrap;gap:4px}.filter-bar button{border:1px solid var(--line);background:transparent;color:var(--muted);padding:4px 7px;font:7px var(--mono);cursor:pointer}.filter-bar button.active{color:var(--blue);border-color:var(--blue)}
+.signal-row{display:grid;grid-template-columns:48px 50px 1fr 100px 68px;gap:7px;align-items:center;border-bottom:1px solid var(--line-soft);padding:7px 10px;cursor:pointer}.signal-row:hover{background:var(--panel-2)}.signal-row time{color:var(--muted);font:7px var(--mono)}.signal-row b{font-size:8px}.signal-row small{display:block;color:var(--muted);font-size:7px;margin-top:2px}.signal-row .tier{color:var(--orange);font:7px var(--mono)}
+.timeline{padding:12px 18px 15px;display:flex;gap:0;overflow-x:auto}.timeline-item{min-width:165px;position:relative;padding:20px 10px 0;border-top:1px solid var(--line)}.timeline-item::before{content:"";position:absolute;top:-5px;left:11px;width:8px;height:8px;border-radius:50%;background:var(--green);border:1px solid var(--green)}.timeline-item.future::before{background:var(--panel);border-color:var(--blue)}.timeline-item time{color:var(--blue);font:7px var(--mono)}.timeline-item b{display:block;margin-top:4px;font-size:8px}.timeline-item small{color:var(--muted);font-size:7px}
+.discovery-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:8px 10px 10px}.discovery-card{border:1px solid var(--line-soft);background:color-mix(in srgb,var(--panel-2) 50%,transparent);padding:8px;cursor:pointer}.discovery-card header{display:flex;justify-content:space-between}.discovery-card h3{margin:5px 0;font-size:9px}.discovery-card p{margin:0;color:var(--muted);font-size:7px;line-height:1.5}.discovery-card footer{display:flex;justify-content:space-between;align-items:center;margin-top:8px;color:var(--blue);font:7px var(--mono)}.watch-btn{border:1px solid var(--line);background:transparent;color:var(--muted);padding:3px 6px;font:7px var(--mono);cursor:pointer}.watch-btn.on{color:var(--green);border-color:var(--green)}
+
+.tab-page{max-width:1440px;margin:auto;padding:18px 20px 70px}.tab-hero{min-height:110px;display:flex;justify-content:space-between;align-items:center;gap:20px;border-bottom:1px solid var(--line);margin-bottom:12px}.tab-hero small{color:var(--blue);font:8px var(--mono);letter-spacing:.13em}.tab-hero h1{font-size:27px;margin:7px 0}.tab-hero p{color:var(--muted);margin:0;max-width:700px}.hero-stat{min-width:190px;border:1px solid var(--line);background:var(--panel);padding:12px}.hero-stat span{color:var(--muted);font:7px var(--mono)}.hero-stat b{display:block;margin:7px 0;font:19px var(--mono);color:var(--green)}.hero-stat small{color:var(--muted);letter-spacing:0}
+.macro-grid{grid-template-columns:repeat(3,minmax(0,1fr));display:grid;gap:8px}.macro-card{padding-bottom:9px;cursor:pointer}.macro-card .body{padding:10px}.macro-card .icon{width:30px;height:30px;display:grid;place-items:center;border:1px solid var(--blue);color:var(--blue);font:13px var(--mono)}.macro-card strong{display:block;margin:10px 0 5px;font-size:16px}.macro-card p{color:var(--muted);font-size:8px;line-height:1.6}.macro-card footer{display:flex;justify-content:space-between;border-top:1px solid var(--line-soft);padding-top:7px;color:var(--muted);font:7px var(--mono)}.macro-calendar{margin-top:10px;border:1px solid var(--line);background:var(--panel)}.calendar-row{display:grid;grid-template-columns:70px 1fr 120px 40px;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line-soft);align-items:center}.calendar-row time{color:var(--blue);font:8px var(--mono)}.calendar-row span{color:var(--muted)}
+.lag-note{display:flex;gap:9px;align-items:center;border:1px solid color-mix(in srgb,var(--orange) 40%,var(--line));background:color-mix(in srgb,var(--orange) 7%,var(--panel));padding:9px 11px;color:var(--muted);margin-bottom:9px}.lag-note>b{color:var(--orange);font:14px var(--mono)}.lag-note strong{color:var(--text)}
+.fund-kpis{grid-template-columns:repeat(4,minmax(0,1fr));display:grid;gap:7px;margin-bottom:9px}.fund-kpi{border:1px solid var(--line);background:var(--panel);padding:10px}.fund-kpi small{color:var(--muted);font:7px var(--mono)}.fund-kpi b{display:block;margin:5px 0;font:20px var(--mono);color:var(--blue)}.fund-kpi span{color:var(--muted);font-size:7px}.flow-bars{padding:8px 10px 10px}.flow-bar{display:grid;grid-template-columns:55px 1fr 35px;gap:7px;align-items:center;margin:6px 0}.flow-bar b{font:8px var(--mono)}.flow-bar span{height:5px;background:var(--line)}.flow-bar i{height:100%;display:block;background:var(--green)}.flow-bar i.out{background:var(--red)}.flow-bar em{font:8px var(--mono);font-style:normal;text-align:right}.fund-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:9px}.fund-card{border:1px solid var(--line);background:var(--panel);padding:9px;text-align:left;cursor:pointer}.fund-card header{display:flex;justify-content:space-between}.fund-card h3{margin:8px 0 4px}.fund-card p{color:var(--muted);font-size:7px}.fund-card footer{display:flex;justify-content:space-between;border-top:1px solid var(--line-soft);padding-top:6px;color:var(--muted)}.fund-card em{color:var(--green);font:10px var(--mono);font-style:normal}
+.portfolio-layout{display:grid;grid-template-columns:330px 1fr;gap:9px}.panel{border:1px solid var(--line);background:var(--panel)}.panel-title{display:flex;justify-content:space-between;align-items:center;padding:9px 10px;border-bottom:1px solid var(--line)}.panel-title h2{margin:0;font-size:10px}.panel-title span{color:var(--muted);font:7px var(--mono)}.pool-search{width:calc(100% - 16px);margin:8px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);padding:7px;outline:0}.pool-list{max-height:590px;overflow:auto}.pool-row{display:grid;grid-template-columns:1fr 95px 35px;gap:6px;align-items:center;padding:7px 9px;border-top:1px solid var(--line-soft)}.pool-row b{display:block;color:var(--blue);font:9px var(--mono)}.pool-row small{color:var(--muted);font-size:7px}.pool-row input[type="range"]{width:100%;accent-color:var(--blue)}.pool-row strong{font:9px var(--mono);text-align:right}.builder-head{display:flex;justify-content:space-between;gap:10px;padding:9px 10px;border-bottom:1px solid var(--line)}.builder-head h2{margin:0;font-size:10px}.builder-head p{color:var(--muted);font-size:7px;margin:3px 0 0}.builder-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px}.builder-actions button{border:1px solid var(--line);background:transparent;color:var(--muted);padding:5px 7px;font:7px var(--mono);cursor:pointer}.builder-actions button.primary{color:var(--blue);border-color:var(--blue)}.weight-total{display:flex;align-items:center;gap:8px}.weight-total b{font:16px var(--mono);color:var(--green)}.weight-total.warn b{color:var(--orange)}.period-tabs{display:flex;gap:4px;padding:8px 10px}.period-tabs button{border:1px solid var(--line);background:transparent;color:var(--muted);padding:4px 8px;font:7px var(--mono);cursor:pointer}.period-tabs button.active{color:var(--blue);border-color:var(--blue)}.backtest-empty{min-height:240px;margin:0 10px 10px;border:1px dashed var(--line);display:grid;place-items:center;text-align:center;color:var(--muted);padding:20px}.backtest-empty b{display:block;color:var(--text);margin-bottom:6px}.scheme-list{padding:0 10px 10px;display:flex;gap:5px;flex-wrap:wrap}.scheme-list button{border:1px solid var(--line);background:var(--panel-2);color:var(--muted);padding:4px 7px;font:7px var(--mono);cursor:pointer}
+.rules-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:9px}.rule-card{border:1px solid var(--line);background:var(--panel);padding:9px}.rule-card header{display:flex;justify-content:space-between}.rule-card p{color:var(--muted);font-size:7px;line-height:1.5}.trade-shell{border:1px solid var(--line);background:var(--panel);overflow:auto}.trade-table{min-width:1040px}.trade-table th,.trade-table td{padding:7px 8px;border-bottom:1px solid var(--line-soft);text-align:left;font-size:7px}.trade-table th{color:var(--muted);font:7px var(--mono);background:var(--panel-3);position:sticky;top:0}.trade-table tbody tr{cursor:pointer}.trade-table tbody tr:hover{background:var(--panel-2)}.trade-table td:first-child{color:var(--blue);font:9px var(--mono)}.score{color:var(--green);font:10px var(--mono)}.method-note{color:var(--muted);font-size:7px;line-height:1.6;padding:8px 10px;border-top:1px solid var(--line-soft)}
+.alert-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr);gap:9px}.alert-rule{display:grid;grid-template-columns:30px 55px 1fr 42px;gap:7px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line-soft)}.alert-rule .idx{color:var(--muted);font:8px var(--mono)}.alert-rule b{font-size:8px}.alert-rule small{display:block;color:var(--muted);font-size:7px;margin-top:2px}.switch{width:34px;height:18px;position:relative}.switch input{position:absolute;opacity:0}.switch span{position:absolute;inset:0;border-radius:999px;background:var(--line);cursor:pointer}.switch span::after{content:"";position:absolute;width:14px;height:14px;left:2px;top:2px;border-radius:50%;background:var(--muted);transition:.18s}.switch input:checked+span{background:color-mix(in srgb,var(--green) 28%,var(--line))}.switch input:checked+span::after{left:18px;background:var(--green)}.channel{display:grid;grid-template-columns:27px 1fr auto;gap:7px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line-soft)}.channel>span{width:25px;height:25px;display:grid;place-items:center;border:1px solid var(--line);color:var(--blue);font:9px var(--mono)}.alert-event{display:grid;grid-template-columns:55px 55px 1fr;gap:7px;align-items:start;padding:8px 10px;border-bottom:1px solid var(--line-soft)}.alert-event time{color:var(--muted);font:7px var(--mono)}.alert-event b{font-size:8px}.alert-event small{display:block;color:var(--muted);font-size:7px;margin-top:3px}
+
+.drawer-mask{position:fixed;inset:0;background:#0008;z-index:100;opacity:0;pointer-events:none;transition:.18s}.drawer-mask.open{opacity:1;pointer-events:auto}.drawer{position:fixed;top:0;right:0;bottom:0;width:min(510px,94vw);z-index:110;background:var(--bg);border-left:1px solid var(--line);box-shadow:-20px 0 55px #0008;transform:translateX(105%);transition:.2s;display:flex;flex-direction:column}.drawer.open{transform:translateX(0)}.drawer-head{height:52px;display:grid;grid-template-columns:34px 1fr 34px;gap:7px;align-items:center;padding:0 10px;border-bottom:1px solid var(--line);background:var(--panel)}.drawer-head button{height:30px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}.drawer-head small{display:block;color:var(--blue);font:7px var(--mono);letter-spacing:.1em}.drawer-head h2{font-size:11px;margin:3px 0 0}.drawer-body{padding:14px;overflow:auto;line-height:1.65}.drawer-body h3{font-size:9px;margin:17px 0 7px;border-left:2px solid var(--blue);padding-left:7px}.drawer-body p{color:var(--muted);font-size:8px}.drawer-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.drawer-kpi{border:1px solid var(--line);background:var(--panel);padding:9px}.drawer-kpi small{color:var(--muted);font:7px var(--mono)}.drawer-kpi b{display:block;margin-top:5px;font:16px var(--mono);color:var(--green)}.logic-box{display:grid;grid-template-columns:75px 1fr;border:1px solid var(--line);background:var(--panel)}.logic-box>*{padding:7px 8px;border-bottom:1px solid var(--line-soft);font-size:8px}.logic-box b{color:var(--blue);font-family:var(--mono)}.logic-box span{color:var(--muted)}.drawer-actions{display:flex;gap:6px;flex-wrap:wrap}.drawer-actions button,.drawer-actions a{border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:6px 8px;text-decoration:none;font:7px var(--mono);cursor:pointer}.drawer-actions button:hover,.drawer-actions a:hover{color:var(--blue);border-color:var(--blue)}
+.whatsnew-btn{position:fixed;right:18px;bottom:18px;z-index:80;width:42px;height:42px;border-radius:50%;border:1px solid color-mix(in srgb,var(--orange) 55%,var(--line));background:var(--panel);color:var(--orange);box-shadow:0 8px 25px var(--shadow);cursor:pointer}.whatsnew-btn.unread{animation:ring 1.8s infinite}@keyframes ring{0%,100%{transform:rotate(0)}10%{transform:rotate(8deg)}20%{transform:rotate(-8deg)}30%{transform:rotate(5deg)}40%{transform:rotate(0)}}.whatsnew-btn b{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:var(--red);color:#fff;display:grid;place-items:center;font:8px var(--mono)}
+.toast{position:fixed;left:50%;bottom:24px;z-index:130;transform:translate(-50%,20px);opacity:0;pointer-events:none;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:8px 12px;box-shadow:0 10px 30px var(--shadow);transition:.18s}.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width: 1180px) {
+  .topbar { grid-template-columns:auto auto 1fr minmax(190px,270px) auto; }.snapshot-control{display:none}.workspace{grid-template-columns:185px minmax(0,1fr)}.toc a{font-size:7px}.split-65{grid-template-columns:1fr}.demand-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.chain-strip{grid-template-columns:repeat(3,minmax(0,1fr))}.macro-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.fund-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width: 820px) {
+  .topbar{height:auto;min-height:52px;grid-template-columns:auto 1fr auto;padding:6px 9px}.live-pill{display:none}.main-tabs{grid-column:1/-1;height:35px}.main-tabs button{flex:1;padding:0 7px}.search{display:none}.workspace{display:block}.toc{position:sticky;top:93px;height:auto;display:flex;gap:4px;overflow-x:auto;padding:6px;border-right:0;border-bottom:1px solid var(--line);z-index:30}.toc-head,.toc-group{display:none}.toc a{min-width:115px;grid-template-columns:24px 1fr;padding:4px;background:var(--panel)}.overview-main{padding:8px 7px 70px}.grid-2,.grid-3,.grid-4,.logic-columns,.portfolio-layout,.alert-layout{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.demand-grid,.chain-strip,.delivery-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.capex-wrap{grid-template-columns:1fr}.capex-total{border-left:0;border-top:1px solid var(--line)}.industry-wrap{padding:6px}.signal-row{grid-template-columns:45px 48px 1fr}.signal-row .tier,.signal-row .cred{display:none}.tab-page{padding:12px 8px 70px}.tab-hero{min-height:92px}.tab-hero h1{font-size:22px}.hero-stat{display:none}.macro-grid{grid-template-columns:1fr}.fund-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.rules-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width: 520px) {
+  .brand small{display:none}.main-tabs button{font-size:8px}.icon-btn{width:27px;height:27px}.demand-grid,.chain-strip,.delivery-grid,.discovery-grid{grid-template-columns:1fr}.donut-area{grid-template-columns:120px 1fr}.kpi-grid{grid-template-columns:1fr 1fr}.logic-columns{grid-template-columns:1fr}.fund-cards{grid-template-columns:1fr}.calendar-row{grid-template-columns:55px 1fr auto}.calendar-row span{display:none}.rules-grid{grid-template-columns:1fr}.drawer-kpis{grid-template-columns:1fr 1fr}.portfolio-layout{display:block}.pool-panel{margin-bottom:8px}
+}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+</style>
+  <script>
+(function () {
+  var live = {"meta":{"title":"AI 产业链投研工作台","period":"2026-07-18","generated_at":"2026-07-18T07:10:00+08:00","quote_asof":"2026-07-17","last_crawl":"2026-07-18T06:45:00+08:00","total_signals":89,"crawl_sources":8,"new_sources_today":4,"versions":{"signals":"v2.7","capex":"v2.4","macro":"v2.1","flows":"v2.3","trade":"v2.6"}},"kpi":{"good":67,"neutral":6,"rumor":5,"bad":4,"observe":7,"net_position":78,"net_position_prev":74,"spark":{"good":[54,57,58,61,60,63,64,66,67],"neutral":[5,6,5,6,6,6,6,6,6],"rumor":[7,6,4,5,5,5,5,5,5],"bad":[2,2,3,3,3,4,4,4,4]},"spark_all_actual":true},"capex":{"firms":["Amazon","Microsoft","Alphabet","Meta","Oracle*"],"y2024":[78,56,53,39,9],"y2025":[131,89,91,72,21],"y2026e":[200,190,180,125,55],"yoy25":[68,59,72,85,133],"yoy26":[53,113,98,74,162],"total":[235,404,750],"total_yoy":[null,72,86],"asof":"2026-07-18","year_actual":[2024,2025],"est_years":[2026],"caliber_note":"2024/2025 为公开实绩；2026E 为官方 IR 指引或研究中值，以斜纹与 E 标识。Oracle 为财年口径。","basis_note":"金额单位：十亿美元；用于验证需求总闸门，不自动等同于所有产业链标的利好。"},"demand_core":{"version":"v2.5","asof":"2026-07-18","intro":"从预算、云增长、算力强度、订单与应用变现五层验证需求是否超预期。","note":"预期/指引均用 E 标识，不作为已发生事实。","cards":[{"key":"capex","label":"算力总闸门","value":"$750B","value_sub":"Big5 2026E","delta":"+86% YoY E","dir":"good","desc":"官方指引与研究中值维持高位","source":"公司 IR","credibility":"权威","trend":[235,404,750],"forecast_from":2},{"key":"cloud","label":"云需求加速","value":"+39%","value_sub":"Azure FY26 Q2","delta":"仍受供给约束","dir":"good","desc":"云收入增速与订单共同验证","source":"Microsoft IR","credibility":"权威","trend":[31,33,35,39,39]},{"key":"compute","label":"算力需求强度","value":"+80%","value_sub":"容量计划 E","delta":"两年 DC 翻倍","dir":"good","desc":"GPU 与数据中心容量继续扩张","source":"公司指引","credibility":"权威","trend":[24,36,49,63,80],"forecast_from":3},{"key":"orders","label":"融资 / 采购订单","value":"$638B","value_sub":"Oracle RPO","delta":"大型合同验证","dir":"good","desc":"订单高增但仍需验证交付节奏","source":"Oracle IR","credibility":"权威","trend":[98,130,138,523,638]},{"key":"monetize","label":"AI 应用变现","value":"$70B+","value_sub":"Cloud 年化收入","delta":"Q4 +48%","dir":"observe","desc":"收入增长明确，ROI 分化仍在","source":"Alphabet IR","credibility":"权威","trend":[38,45,53,61,70]}]},"chains":[{"id":"cloud","name":"云 Capex","score":95,"verdict":"利好","highlight":"需求总闸门","evidence":"Big5 2026E 合计约 7500 亿美元","companies":["AMZN","MSFT","GOOGL","META"],"etfs":["QQQ"]},{"id":"gpu","name":"GPU / AI 芯片","score":88,"verdict":"利好","highlight":"算力平台","evidence":"需求强、先进封装仍约束供给","companies":["NVDA","AMD","TSM"],"etfs":["SOXX"]},{"id":"equipment","name":"半导体设备","score":78,"verdict":"利好","highlight":"扩产先行","evidence":"先进制程与封装设备订单验证","companies":["ASML","AMAT"],"etfs":["SOXX"]},{"id":"hbm","name":"HBM / 存储","score":96,"verdict":"利好","highlight":"全年售罄","evidence":"HBM4E 良率与供需仍是关键","companies":["MU","SK hynix"],"etfs":["SOXX"]},{"id":"optical","name":"光模块 / CPO","score":92,"verdict":"利好","highlight":"1.6T 迁移","evidence":"800G 向 1.6T 的结构升级","companies":["AVGO","COHR"],"etfs":["SOXX"]}],"chain_logic":{"upstream_flow":[{"id":"cloud","name":"云厂 / 需求端","role":"资本开支","desc":"预算与订单决定总需求","verdict":"利好","companies":["AMZN","MSFT","GOOGL","META"]},{"id":"gpu","name":"GPU / 算力","role":"核心算力","desc":"加速器与定制 ASIC 分流","verdict":"中性","companies":["NVDA","AMD","AVGO"]},{"id":"fab","name":"先进制造 / 封装","role":"供给瓶颈","desc":"先进制程、CoWoS 与 HBM","verdict":"利好","companies":["TSM","ASML","MU"]},{"id":"infra","name":"机房 / 电力","role":"交付验证","desc":"并网、PPA、液冷与设备","verdict":"观察","companies":["VST","CEG","VRT"]}],"profit_priority":[{"id":"cowos","name":"先进封装 CoWoS + 光刻","score":94,"verdict":"稀缺性溢价","companies":["TSM","ASML","AMKR"]},{"id":"hbm","name":"HBM / 存储","score":91,"verdict":"供需偏紧","companies":["MU","SK hynix"]},{"id":"optical","name":"光模块 / CPO","score":84,"verdict":"升级周期","companies":["AVGO","COHR"]},{"id":"power","name":"AI 电力 / 核电","score":76,"verdict":"交付约束","companies":["VST","CEG","GEV"]}]},"earnings_trends":[{"metric":"数据中心收入","value":98,"priority":"P1","impact_rank":1,"reason":"最直接的算力需求兑现","source":"NVIDIA IR","credibility":"权威","actual":[22,30,35,47,62],"estimate":[70,79]},{"metric":"云收入增速","value":91,"priority":"P1","impact_rank":2,"reason":"验证应用与基础设施需求","source":"公司财报","credibility":"权威","actual":[28,31,35,39],"estimate":[41,43]},{"metric":"算力在手订单","value":89,"priority":"P1","impact_rank":3,"reason":"验证未来需求强度","source":"Oracle IR","credibility":"权威","actual":[98,130,138,523,638],"estimate":[]},{"metric":"先进封装利用率","value":84,"priority":"P2","impact_rank":4,"reason":"供给瓶颈与议价权","source":"公司指引","credibility":"较可信","actual":[72,78,83,88],"estimate":[90]},{"metric":"HBM 供需","value":82,"priority":"P2","impact_rank":5,"reason":"存储价格与产品结构","source":"TrendForce","credibility":"权威","actual":[65,72,79,82],"estimate":[86]},{"metric":"AI 毛利兑现","value":68,"priority":"P2","impact_rank":6,"reason":"折旧与成本开始影响盈利","source":"公司财报","credibility":"权威","actual":[72,71,70,68],"estimate":[67]},{"metric":"应用付费渗透","value":61,"priority":"P3","impact_rank":7,"reason":"决定长期 ROI","source":"行业样本","credibility":"较可信","actual":[38,47,55,61],"estimate":[66]}],"companies":{"NVDA":{"name":"NVIDIA","cn":"英伟达","market":"US","cur":172.4,"chg":-2.1,"pe":41,"peg":1.45,"d20":-3.8,"logic":"GPU 平台需求强，交易性价比等待回撤","est":"合理偏贵","earn":"31 天","source":"NVIDIA IR"},"AMD":{"name":"AMD","cn":"超威","market":"US","cur":149.8,"chg":-1.6,"pe":38,"peg":1.75,"d20":-6.2,"logic":"份额期权仍需软件生态验证","est":"观察","earn":"45 天","source":"AMD IR"},"TSM":{"name":"TSMC","cn":"台积电","market":"US","cur":241.1,"chg":0.8,"pe":27,"peg":1.22,"d20":-4.9,"logic":"先进制程与封装稀缺性强","est":"相对均衡","earn":"89 天","source":"TSMC IR"},"ASML":{"name":"ASML","cn":"阿斯麦","market":"US","cur":1036.2,"chg":-0.4,"pe":31,"peg":1.63,"d20":-5.7,"logic":"EUV 垄断但订单节奏敏感","est":"合理","earn":"90 天","source":"ASML IR"},"MU":{"name":"Micron","cn":"美光","market":"US","cur":168.3,"chg":-2.8,"pe":18,"peg":null,"d20":-8.1,"logic":"周期股不机械使用 PEG，重点看 HBM 供需与库存","est":"周期回撤","earn":"70 天","source":"Micron IR"},"AVGO":{"name":"Broadcom","cn":"博通","market":"US","cur":329.2,"chg":1.1,"pe":39,"peg":1.58,"d20":-1.4,"logic":"ASIC 与网络双重受益，客户集中需折价","est":"合理偏贵","earn":"45 天","source":"Broadcom IR"},"QCOM":{"name":"Qualcomm","cn":"高通","market":"US","cur":176.5,"chg":0.2,"pe":16,"peg":1.12,"d20":-2.5,"logic":"端侧 AI 可选性，主线传导较弱","est":"合理","earn":"62 天","source":"Qualcomm IR"}},"industries":[{"key":"software","name":"软件研发","cases":12,"roi":87,"maturity":93,"commercialization":72,"tam":580,"penetration":0.12,"ai_tam":69.6,"source":"Gartner"},{"key":"marketing","name":"广告营销","cases":16,"roi":84,"maturity":91,"commercialization":79,"tam":760,"penetration":0.16,"ai_tam":121.6,"source":"IDC"},{"key":"finance","name":"金融服务","cases":9,"roi":76,"maturity":84,"commercialization":61,"tam":1200,"penetration":0.08,"ai_tam":96,"source":"行业公开报告"},{"key":"health","name":"医疗健康","cases":8,"roi":69,"maturity":78,"commercialization":58,"tam":1450,"penetration":0.05,"ai_tam":72.5,"source":"行业公开报告"},{"key":"service","name":"客户服务","cases":18,"roi":82,"maturity":88,"commercialization":74,"tam":310,"penetration":0.22,"ai_tam":68.2,"source":"Gartner"},{"key":"manufacturing","name":"工业制造","cases":7,"roi":66,"maturity":72,"commercialization":49,"tam":2100,"penetration":0.03,"ai_tam":63,"source":"IDC"},{"key":"retail","name":"零售电商","cases":13,"roi":73,"maturity":82,"commercialization":68,"tam":890,"penetration":0.11,"ai_tam":97.9,"source":"行业公开报告"},{"key":"education","name":"教育","cases":6,"roi":71,"maturity":76,"commercialization":45,"tam":410,"penetration":0.08,"ai_tam":32.8,"source":"行业公开报告"},{"key":"legal","name":"法律","cases":7,"roi":68,"maturity":79,"commercialization":51,"tam":160,"penetration":0.13,"ai_tam":20.8,"source":"行业公开报告"},{"key":"logistics","name":"交通物流","cases":5,"roi":61,"maturity":67,"commercialization":44,"tam":980,"penetration":0.03,"ai_tam":29.4,"source":"行业公开报告"},{"key":"energy","name":"能源","cases":5,"roi":57,"maturity":63,"commercialization":42,"tam":1330,"penetration":0.02,"ai_tam":26.6,"source":"行业公开报告"}],"industry_cases":{"software":[{"name":"代码助手规模化","buyer":"企业研发团队","vendor":"MSFT / GitHub","scene":"代码生成与测试","roi":"交付周期缩短","stage":"规模化","source":"公司案例"}],"marketing":[{"name":"广告素材生成","buyer":"品牌广告主","vendor":"GOOGL / META","scene":"创意与投放","roi":"转化率提升","stage":"规模化","source":"公司案例"}]},"delivery_validation":{"threshold":3,"triggered_count":0,"status_text":"0/4 监测中","alert_title":"数据中心基础设施成熟信号共振","alert_desc":"达到 ≥3/4 时，提示推理规模化爆发窗口可能开启。","signals":[{"name":"云厂已投入使用 Capex 占比","source":"四家云厂季报","trigger":">60% 且环比提升","status":"未触发"},{"name":"大型 PPA 签署事件","source":"Reuters / Bloomberg","trigger":">500MW 或单月 >3 笔","status":"未触发"},{"name":"GPU 实例可用性","source":"AWS / Azure 定价页","trigger":"unavailable → on demand","status":"未触发"},{"name":"推理成本斜率","source":"Epoch AI","trigger":"年降速 >50% → <20%","status":"未触发"}]},"risk_exposure":[{"company":"NVIDIA","ticker":"NVDA","sector":"GPU","cn_rev_pct":17,"risk_type":"出口管制","level":"高","trend":"上升","assess":"高端产品可服务市场受限","source":"公司文件"},{"company":"ASML","ticker":"ASML","sector":"设备","cn_rev_pct":15,"risk_type":"出口许可","level":"高","trend":"上升","assess":"成熟制程需求与政策博弈","source":"公司文件"},{"company":"Micron","ticker":"MU","sector":"存储","cn_rev_pct":11,"risk_type":"监管 / 周期","level":"中","trend":"稳定","assess":"HBM 增量对冲传统存储风险","source":"公司文件"},{"company":"Broadcom","ticker":"AVGO","sector":"ASIC / 网络","cn_rev_pct":8,"risk_type":"客户集中","level":"中","trend":"稳定","assess":"云厂集中度与定制项目节奏","source":"公司文件"}],"rumors":[{"id":"rm1","name":"先进 GPU 出口规则进一步收紧","date":"2026-07-17","impact":"利空","impact_tier":"改变行业增速假设","confidence":72,"logicFit":84,"risk":91,"freq":82,"companies":["NVDA","AMD"],"source":"一线媒体","rationale":"若落地将缩小可服务市场","verify":"BIS 正式文件"},{"id":"rm2","name":"CoWoS 扩产节奏提前","date":"2026-07-16","impact":"观察","impact_tier":"普通信号","confidence":58,"logicFit":76,"risk":32,"freq":54,"companies":["TSM","NVDA"],"source":"产业链渠道","rationale":"供给释放有利交付但可能削弱稀缺性","verify":"TSMC 法说会"}],"signals":[{"id":"s1","date":"2026-07-17","claim":"AI 芯片板块出现显著轮动回撤","impact":"观察","signal":"观察","confidence":"较可信","impact_tier":"改变行业增速假设","sector":"半导体","chain":"交易","companies":["NVDA","AVGO","TSM"],"source":"Reuters","credibility":"权威","rationale":"趋势未证伪，但交易性价比从追涨切换到等待确认。"},{"id":"s2","date":"2026-06-25","claim":"Oracle FY26 RPO 增至 $638B","impact":"利好","signal":"确认","confidence":"权威","impact_tier":"改变头部竞争格局","sector":"云","chain":"Capex","companies":["ORCL","NVDA","AVGO"],"source":"Oracle IR","credibility":"权威","rationale":"大型 AI 合同验证算力需求，但仍需跟踪资本筹措与交付节奏。"},{"id":"s3","date":"2026-04-29","claim":"微软 2026 日历年 Capex 约 $190B E","impact":"利好","signal":"指引","confidence":"权威","impact_tier":"改变行业增速假设","sector":"云","chain":"Capex","companies":["MSFT","NVDA"],"source":"Microsoft IR","credibility":"权威","rationale":"需求端强，仍需结合供给与估值判断标的动作。"},{"id":"s4","date":"2026-02-25","claim":"NVIDIA 数据中心季度收入 $62.3B","impact":"利好","signal":"财报","confidence":"权威","impact_tier":"改变头部竞争格局","sector":"GPU","chain":"算力","companies":["NVDA"],"source":"NVIDIA IR","credibility":"权威","rationale":"同比高增长继续验证加速计算需求。"},{"id":"s5","date":"2026-02-05","claim":"Amazon 指引 2026 Capex 约 $200B E","impact":"利好","signal":"指引","confidence":"权威","impact_tier":"改变行业增速假设","sector":"云","chain":"Capex","companies":["AMZN","NVDA"],"source":"Amazon IR","credibility":"权威","rationale":"预算验证需求总闸门，不代表所有标的均具备交易性价比。"},{"id":"s6","date":"2026-07-16","claim":"CoWoS 扩产节奏或提前","impact":"观察","signal":"传闻","confidence":"一般/待核","impact_tier":"普通信号","sector":"封装","chain":"供给","companies":["TSM","NVDA"],"source":"产业链渠道","credibility":"一般/待核","rationale":"等待 TSMC 官方口径确认。"},{"id":"s7","date":"2026-07-15","claim":"实际利率维持高位","impact":"中性","signal":"宏观","confidence":"权威","impact_tier":"普通信号","sector":"宏观","chain":"估值","companies":["QQQ","SOXX"],"source":"FRED","credibility":"权威","rationale":"盈利预期稳定，但贴现率压制高估值资产。"},{"id":"s8","date":"2026-07-14","claim":"先进 GPU 出口规则存在收紧风险","impact":"利空","signal":"政策","confidence":"较可信","impact_tier":"改变行业增速假设","sector":"监管","chain":"风险","companies":["NVDA","AMD"],"source":"一线媒体","credibility":"较可信","rationale":"潜在可服务市场下降，需等待正式监管文本。"}],"timeline":[{"date":"2026-07-14","title":"出口管制风险升温","kind":"风险","future":false},{"date":"2026-07-17","title":"芯片板块轮动回撤","kind":"观察","future":false},{"date":"2026-07-29","title":"FOMC 利率决议","kind":"宏观","future":true},{"date":"2026-08-12","title":"美国 CPI","kind":"宏观","future":true},{"date":"2026-08-27","title":"NVDA 下一财报窗口","kind":"财报","future":true}],"next_watch":["NVDA / AVGO 新 IR 公告","TSMC 财报与 CoWoS 扩产口径","HBM 现货价与 HBM4E 良率","大型 PPA 与 GPU 实例可用性"],"key_companies":["NVDA","AVGO","TSM","MU","ASML","AMD"],"etf_focus":[{"ticker":"SOXX","name":"iShares Semiconductor ETF","role":"半导体主线","verdict":"分散单票与政策风险"},{"ticker":"QQQ","name":"Invesco QQQ","role":"平台与应用","verdict":"覆盖云平台和软件变现"},{"ticker":"GRID","name":"Grid Infrastructure ETF","role":"电力与电网","verdict":"基础设施交付可选性"}],"recommendations":[{"label":"核心持仓","names":"NVDA / AVGO / TSM","action":"回撤确认后分批","reason":"需求与供给强，但估值需纪律"},{"label":"周期弹性","names":"MU / SK hynix","action":"跟踪价格与库存","reason":"不机械使用 PEG"},{"label":"基础设施","names":"VST / CEG / VRT","action":"观察交付信号","reason":"等待 ≥3/4 成熟共振"}],"holdings_13f":{"flows_meta":{"period":"2026 Q1","reported_asof":"2026-05-15","lagged":true},"summary_overview":"头部基金继续向盈利确定性高的 GPU、ASIC、先进制程集中，同时降低部分高估值应用仓位。","aum_meta":{"aum_13f":"$412B","aum_firm":"$536B","note":"13F 申报资产与机构管理总规模口径不同。"},"funds":[{"name":"Tiger Global","move":"增持","focus":"NVDA · AMZN","note":"AI 平台与云服务继续集中","score":86},{"name":"Coatue","move":"增持","focus":"TSM · AVGO","note":"偏向盈利确定性","score":82},{"name":"Lone Pine","move":"持平","focus":"MSFT · GOOGL","note":"平台权重保持","score":72},{"name":"Appaloosa","move":"减持","focus":"半导体篮子","note":"获利了结与再平衡","score":58}],"consensus_inflow":[{"ticker":"NVDA","score":86},{"ticker":"AVGO","score":72},{"ticker":"TSM","score":64},{"ticker":"AMZN","score":48}],"consensus_outflow":[{"ticker":"AMD","score":-34},{"ticker":"MSFT","score":-22}],"flows_sectors":[{"name":"GPU / 加速器","score":82},{"name":"ASIC / 网络","score":69},{"name":"先进制程","score":62},{"name":"云平台","score":41},{"name":"应用软件","score":18},{"name":"传统半导体","score":-21}],"watch_priority":["NVDA","AVGO","TSM","AMZN"],"funds_note":"13F 有披露滞后，不代表实时交易；排名与规模均按公开申报口径。"},"portfolio_pool":[{"group":"GPU","name":"英伟达","ticker":"NVDA","tag":"核心","pm_weight":18},{"group":"ASIC / 网络","name":"博通","ticker":"AVGO","tag":"核心","pm_weight":14},{"group":"先进制程","name":"台积电","ticker":"TSM","tag":"核心","pm_weight":14},{"group":"HBM","name":"美光","ticker":"MU","tag":"弹性","pm_weight":8},{"group":"设备","name":"阿斯麦","ticker":"ASML","tag":"卡位","pm_weight":8},{"group":"云平台","name":"亚马逊","ticker":"AMZN","tag":"需求","pm_weight":10},{"group":"云平台","name":"微软","ticker":"MSFT","tag":"需求","pm_weight":10},{"group":"ETF","name":"半导体 ETF","ticker":"SOXX","tag":"分散","pm_weight":10},{"group":"ETF","name":"纳指 ETF","ticker":"QQQ","tag":"平台","pm_weight":8}],"pm_preset":{"name":"PM 哑铃组合","desc":"盈利确定性核心 + 基础设施/周期弹性","weights":{"NVDA":18,"AVGO":14,"TSM":14,"MU":8,"ASML":8,"AMZN":10,"MSFT":10,"SOXX":10,"QQQ":8}},"backtest":{"asof":"2026-07-17","note":"本数据包未附完整可审计月末行情，回测引擎保留但不以模拟价格补齐。","legend_note":"补齐真实 monthly 后自动计算。","all_actual":false,"periods":["3M","6M","12M","2Y"],"benchmarks":["QQQ","SOXX"],"monthly":{}},"trade":{"asof":"2026-07-17","intro":"产业趋势回答买什么，交易规则回答什么时候动。","disclaimer":"规则化研究提示，不构成自动交易。","thresholds":{"pullback_buy_min":-8,"pullback_buy_max":-3,"overheat_pct_vs_ma50":15,"stop_dd_pct":-12,"earn_soon_days":14,"event_lookback_days":7},"rules":[{"name":"买入","desc":"回撤进入买入区间 + 接近 20/50 日线且不过热"},{"name":"加仓","desc":"基本面维持 + 价格止稳 + 无重大风险事件"},{"name":"减仓","desc":"较 MA50 过热 + 5D/20D 波动放大"},{"name":"卖出","desc":"跌破止损或主线逻辑被证伪"}],"rows":[{"ticker":"NVDA","name":"英伟达","cur":172.4,"ma20":179.2,"ma50":160.8,"ma200":135.7,"d20":-3.8,"d50":7.2,"ret5":-4.1,"ret20":-3.8,"buy_lo":164,"buy_hi":171,"overheated":false,"stop_hit":false,"earn_days":31,"news_recent":true,"score":82,"action":"等待","event_title":"板块轮动回撤"},{"ticker":"AVGO","name":"博通","cur":329.2,"ma20":333.8,"ma50":314.1,"ma200":276.4,"d20":-1.4,"d50":4.8,"ret5":-1.8,"ret20":2.4,"buy_lo":310,"buy_hi":323,"overheated":false,"stop_hit":false,"earn_days":45,"news_recent":true,"score":86,"action":"分批","event_title":"ASIC 需求验证"},{"ticker":"TSM","name":"台积电","cur":241.1,"ma20":253.5,"ma50":238.2,"ma200":202.6,"d20":-4.9,"d50":1.2,"ret5":-2.7,"ret20":-4.9,"buy_lo":232,"buy_hi":244,"overheated":false,"stop_hit":false,"earn_days":89,"news_recent":false,"score":89,"action":"加仓","event_title":"先进制程强"},{"ticker":"MU","name":"美光","cur":168.3,"ma20":183.1,"ma50":172.4,"ma200":139.2,"d20":-8.1,"d50":-2.4,"ret5":-6.3,"ret20":-8.1,"buy_lo":160,"buy_hi":170,"overheated":false,"stop_hit":false,"earn_days":70,"news_recent":true,"score":71,"action":"观察","event_title":"周期波动放大"},{"ticker":"ASML","name":"阿斯麦","cur":1036.2,"ma20":1098.8,"ma50":1028,"ma200":921,"d20":-5.7,"d50":0.8,"ret5":-2.1,"ret20":-5.7,"buy_lo":990,"buy_hi":1045,"overheated":false,"stop_hit":false,"earn_days":90,"news_recent":false,"score":78,"action":"分批","event_title":"订单节奏验证"},{"ticker":"SOXX","name":"半导体 ETF","cur":294.4,"ma20":313.9,"ma50":288.3,"ma200":254.8,"d20":-6.2,"d50":2.1,"ret5":-3.4,"ret20":-6.2,"buy_lo":282,"buy_hi":296,"overheated":false,"stop_hit":false,"earn_days":null,"news_recent":true,"score":84,"action":"加仓","event_title":"分散单票风险"}],"skipped":["SK hynix：当前数据包缺少同口径行情，未进入评分表"]},"alert_rules":[{"id":"r1","title":"NVDA / AVGO 有新的 IR 公告","level":"good","desc":"监测公司投资者关系页面","default":true},{"id":"r2","title":"TSMC 财报当日提醒","level":"observe","desc":"财报与法说会当日提醒","default":true},{"id":"r3","title":"HBM 现货价 ±5% 异动","level":"rumor","desc":"关注供需和周期拐点","default":true},{"id":"r4","title":"传闻风险评级转红","level":"bad","desc":"待验证新闻进入高风险象限","default":true},{"id":"r5","title":"云厂 Capex 指引上 / 下修","level":"good","desc":"改变需求增速假设","default":true},{"id":"r6","title":"对华出口管制新政","level":"bad","desc":"正式监管文件发布","default":false},{"id":"r7","title":"光模块龙头订单 / 价格变动","level":"observe","desc":"1.6T 迁移与价格信号","default":false},{"id":"r8","title":"AI 电力 PPA 签约","level":"observe","desc":"大型电力协议验证建设进度","default":false},{"id":"r9","title":"数据中心基础设施成熟信号共振","level":"observe","desc":"≥3/4 时提示推理规模化窗口","default":true}],"alert_feed":[{"time":"07-18 07:10","level":"observe","title":"芯片板块轮动回撤","detail":"交易性价比从追涨切换到等待确认","rule":"r4"},{"time":"06-25","level":"good","title":"Oracle RPO 大幅上升","detail":"大型 AI 合同继续验证算力需求","rule":"r5"},{"time":"待激活","level":"observe","title":"基础设施成熟信号 0/4","detail":"达到 ≥3/4 时提示推理规模化爆发窗口可能开启","rule":"r9"}],"macro":{"groups":[{"icon":"R","name":"实际利率","value":"高位震荡","direction":"估值压制","desc":"实际利率高位抬升长久期资产贴现率","affects":"PE / 贴现率","next":"美国 CPI · 08-12"},{"icon":"D","name":"美元指数","value":"偏强","direction":"折算压力","desc":"影响跨国科技公司海外收入折算","affects":"盈利预期","next":"FOMC · 07-29"},{"icon":"P","name":"电力成本","value":"结构性上行","direction":"DC 毛利承压","desc":"并网与 PPA 是 Capex 交付关键瓶颈","affects":"盈利 / 交付","next":"EIA 月报 · 07-28"},{"icon":"C","name":"铜与设备","value":"需求偏强","direction":"建设成本上升","desc":"铜、变压器与开关设备反映建设强度","affects":"Capex 效率","next":"制造业 PMI · 08-03"},{"icon":"E","name":"出口管制","value":"高风险","direction":"市场收缩","desc":"先进算力限制影响芯片收入与产品设计","affects":"盈利预期","next":"BIS 政策跟踪"},{"icon":"L","name":"流动性","value":"中性","direction":"风险偏好分化","desc":"拥挤交易在轮动期放大波动","affects":"PE / 资金面","next":"美联储资产负债表 · 每周"}],"calendar":[{"date":"07-29","event":"FOMC 利率决议","affects":"贴现率","level":"高"},{"date":"08-03","event":"美国制造业 PMI","affects":"盈利预期","level":"中"},{"date":"08-07","event":"EIA 电力月报","affects":"交付成本","level":"中"},{"date":"08-12","event":"美国 CPI","affects":"利率路径","level":"高"}]},"discovery":[{"id":"d1","name":"AI 数据中心电力","tam":"$320B","why":"并网、PPA 与变压器成为交付瓶颈","driver":"功率密度与建设周期","bottleneck":"电网接入","mainline_relation":"算力交付","profit_certainty":"高","certainty_score":91,"chain_label":"基础设施","companies":["VST","CEG","ETN"],"etfs":["GRID"]},{"id":"d2","name":"液冷与热管理","tam":"$42B","why":"高功率密度推动风冷向液冷迁移","driver":"单柜功耗","bottleneck":"工程交付","mainline_relation":"机房效率","profit_certainty":"中高","certainty_score":86,"chain_label":"机房","companies":["VRT","MOD"],"etfs":[]},{"id":"d3","name":"推理侧网络","tam":"$65B","why":"Token 流量增长抬升横向扩展需求","driver":"推理并发","bottleneck":"互连带宽","mainline_relation":"网络","profit_certainty":"中高","certainty_score":82,"chain_label":"互连","companies":["AVGO","ANET"],"etfs":["SOXX"]},{"id":"d4","name":"企业级 Agent","tam":"$120B","why":"ROI 从席位转向可度量任务完成","driver":"流程自动化","bottleneck":"可靠性与权限","mainline_relation":"应用变现","profit_certainty":"中","certainty_score":71,"chain_label":"应用","companies":["MSFT","NOW"],"etfs":["QQQ"]}],"discovery_feed":[{"source":"Reuters","track":"电力","date":"2026-07-17","title":"大型数据中心电力协议继续增加","insight":"交付瓶颈从芯片向电力与并网延伸","bucket":"基础设施"},{"source":"公司 IR","track":"液冷","date":"2026-07-16","title":"高密度机柜推动热管理升级","insight":"液冷渗透率与订单可见度提升","bucket":"机房"}],"notes":{"industry":"行业 ROI 同时看成熟度、ROI 与商业化，不能只按案例数量排序。","bottleneck_positioning":"瓶颈位置用于识别利润优先兑现环节：越靠近供给刚性、越容易形成议价权。","portfolio_howto":"候选池搜索后调整权重；总和不为 100% 时可归一化；方案仅保存在本机。","key_companies":"重点公司由需求、供给议价权、估值位置与交易时点共同筛选。","rumor":"传闻需结合产业逻辑、可信度与风险敞口，不能直接当作事实。","earnings_priority":"7 指标按对盈利与主线的影响排序，实绩与预期严格分开。","pe_div":"估值只作为交易约束：盈利趋势向上且估值回落时更具性价比，不能脱离基本面单独判断。","weighting":"影响力分级为 1× / 3× / 5×，高等级负面仍是高权重利空。","industry_tam_method":"AI 空间 = 行业整体规模 × AI 渗透率，统一使用亿美元口径。","timeline":"事件时间轴仅收录可定位日期与来源的事项；未来项使用预期标记，不混入已发生事件。","etf_selection":"ETF 比较同时观察覆盖链条、集中度、费用率与流动性；主题纯度高不等于风险更低。","discovery_feed":"发现池优先跟踪主线外溢出的交付瓶颈，并要求有产业证据和潜在盈利映射。","drawdown":"回撤判断结合主线逻辑、技术位置与事件风险；跌幅本身不自动构成买入理由。","etf_focus":"ETF 重点关注用于表达行业观点并分散单票风险，需与组合中已有持仓合并检查暴露。","backtest":"回测只能使用可审计的真实月末价格，数据缺失时剔除，不使用模拟价格。","impact_tier":"普通信号 1×；改变行业增速假设 3×；改变头部竞争格局 5×。"},"trend_legend":{"actual":"实绩 · 实线 / 实心","estimate":"指引或预期 · 虚线 / 空心 / E"},"whats_new":{"date":"2026-07-18","generated_at":"2026-07-18T07:10:00+08:00","items":[{"tag":"框架","text":"补齐 21 模块导航与全局详情抽屉"},{"tag":"数据","text":"严格区分实绩、指引与预期"},{"tag":"组合","text":"新增搜索、调权、归一化和本地方案"},{"tag":"告警","text":"r9 基础设施成熟共振保持 0/4 待激活"}]}};
+  var snapshots = {"2026-07-17":{"meta":{"title":"AI 产业链投研工作台","period":"2026-07-17","generated_at":"2026-07-17T18:00:00+08:00","total_signals":41},"kpi":{"good":23,"neutral":8,"rumor":0,"bad":5,"observe":13,"net_position":79,"net_position_prev":78,"spark":{}},"signals":[],"companies":{},"portfolio_pool":[],"alert_rules":[],"alert_feed":[],"chains":[],"chain_logic":{},"industries":[],"macro":{},"holdings_13f":{},"trade":{},"discovery":[],"backtest":{},"notes":{},"whats_new":null},"2026-07-11":{"meta":{"title":"AI 产业链投研工作台","period":"2026-07-11","generated_at":"2026-07-11T18:00:00+08:00","total_signals":38},"kpi":{"good":21,"neutral":8,"rumor":0,"bad":5,"observe":12,"net_position":76,"net_position_prev":75,"spark":{}},"signals":[],"companies":{},"portfolio_pool":[],"alert_rules":[],"alert_feed":[],"chains":[],"chain_logic":{},"industries":[],"macro":{},"holdings_13f":{},"trade":{},"discovery":[],"backtest":{},"notes":{},"whats_new":null}};
+  var requested = new URLSearchParams(location.search).get("snapshot");
+  var ok = requested && Object.prototype.hasOwnProperty.call(snapshots, requested);
+  window.__SNAPSHOT_DATE__ = ok ? requested : null;
+  window.__INVALID_SNAPSHOT__ = requested && !ok ? requested : null;
+  window.__DASHBOARD_DATA__ = ok ? snapshots[requested] : live;
+  window.DATA = window.__DASHBOARD_DATA__;
+}());
+</script>
 </head>
 <body>
-<iframe sandbox="allow-scripts" referrerpolicy="no-referrer" title="Ai Chain Terminal" srcdoc="&lt;!doctype html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;utf-8&quot;&gt;
-&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
-&lt;meta name=&quot;referrer&quot; content=&quot;no-referrer&quot;&gt;
-&lt;meta http-equiv=&quot;Content-Security-Policy&quot; content=&quot;default-src &#x27;none&#x27;; script-src &#x27;unsafe-inline&#x27; &#x27;unsafe-eval&#x27; &#x27;wasm-unsafe-eval&#x27; blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; style-src &#x27;unsafe-inline&#x27; blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; img-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data:; frame-src &#x27;none&#x27;; object-src &#x27;none&#x27;; base-uri &#x27;none&#x27;; form-action &#x27;none&#x27;&quot;&gt;
-&lt;title&gt;Ai Chain Terminal&lt;/title&gt;
-&lt;style&gt;:root {
-  color-scheme: light dark;
-  background-color: var(--background) !important;
-
-  /* Agent-facing contract; keep in sync with SKILL.md. */
-  --background: light-dark(rgb(255 255 255), rgb(24 24 24));
-  --foreground: light-dark(rgb(26 28 31), rgb(255 255 255));
-  --card: color-mix(in oklab, var(--foreground) 5%, transparent);
-  --card-foreground: var(--foreground);
-  --popover: light-dark(rgb(255 255 255), rgb(45 45 45));
-  --popover-foreground: var(--foreground);
-  --primary: light-dark(rgb(51 156 255), rgb(131 195 255));
-  --primary-foreground: light-dark(rgb(255 255 255), rgb(13 13 13));
-  --secondary: light-dark(rgb(255 255 255 / 96%), rgb(54 54 54 / 96%));
-  --secondary-foreground: var(--foreground);
-  --muted: color-mix(in srgb, var(--foreground) 10%, transparent);
-  --muted-foreground: light-dark(
-    rgb(26 28 31 / 49.4%),
-    rgb(255 255 255 / 49.8%)
-  );
-  --accent: light-dark(rgb(229 242 255), rgb(13 39 63));
-  --accent-foreground: var(--primary);
-  --destructive: light-dark(rgb(226 85 7), rgb(255 133 73));
-  --border: light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%));
-  --input: light-dark(
-    rgb(26 28 31 / 11.8%),
-    color-mix(in oklab, rgb(0 0 0) 10%, transparent)
-  );
-  --ring: light-dark(rgb(51 156 255), rgb(131 195 255 / 76%));
-  --font-size-base: 14px;
-  --viz-series-1: var(--primary);
-  --viz-series-2: light-dark(rgb(243 136 59), rgb(245 154 86));
-  --viz-series-3: light-dark(rgb(93 201 119), rgb(116 213 139));
-  --viz-series-4: light-dark(rgb(235 119 177), rgb(240 143 192));
-  --viz-series-5: light-dark(rgb(155 121 236), rgb(170 145 239));
-  --viz-series-6: light-dark(rgb(58 185 177), rgb(90 203 194));
-
-  /* Internal implementation variables; not part of the agent contract. */
-  --font-sans: -apple-system, system-ui, &quot;Segoe UI&quot;, sans-serif;
-  --font-mono:
-    ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;,
-    monospace;
-  --font-size-normal: max(11px, var(--font-size-base));
-  --font-size-tooltip: calc(var(--font-size-base) - 1px);
-  --font-size-small: max(11px, calc(var(--font-size-base) - 2px));
-  --font-size-h1: calc(var(--font-size-normal) * 1.7142857143);
-  --font-size-h2: calc(var(--font-size-normal) * 1.4285714286);
-  --font-size-h3: calc(var(--font-size-normal) * 1.2857142857);
-  --font-weight-normal: 430;
-  --font-weight-medium: 500;
-  --line-height-normal: calc(var(--font-size-normal) * 1.5);
-  --line-height-tooltip: calc(var(--font-size-tooltip) * 1.4285714286);
-  --line-height-small: calc(var(--font-size-small) + 4px);
-  --radius: 12.5px;
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-2xl: calc(var(--radius) * 1.6);
-  --radius-full: 9999px;
-  --shadow-sm: 0 1px 2px -1px rgb(0 0 0 / 8%);
-  --checkmark-image: url(&quot;data:image/svg+xml,%3Csvg xmlns=&#x27;http://www.w3.org/2000/svg&#x27; viewBox=&#x27;0 0 17 17&#x27;%3E%3Cpath d=&#x27;M12.8961 3.64101C13.1297 3.41418 13.4984 3.37523 13.7779 3.56581C14.0571 3.75635 14.1554 4.11331 14.0299 4.41347L13.9615 4.53847L7.71151 13.7045C7.59411 13.8767 7.4063 13.9877 7.19881 14.0072C6.99136 14.0267 6.78564 13.9533 6.63826 13.806L2.88826 10.056L2.79842 9.9457C2.6192 9.67407 2.64927 9.30496 2.88826 9.06581C3.12738 8.82669 3.49647 8.79676 3.76815 8.97597L3.8785 9.06581L7.03084 12.2182L12.8053 3.74941L12.8961 3.64101Z&#x27;/%3E%3C/svg%3E&quot;);
-
-  /* Legacy aliases; not part of the current agent contract. */
-  --viz-bg: transparent;
-  --viz-panel: var(--card);
-  --viz-border: var(--border);
-  --viz-text: var(--foreground);
-  --viz-muted: var(--muted-foreground);
-  --viz-accent: var(--primary);
-  --viz-accent-text: var(--primary-foreground);
-  --viz-accent-bg: var(--accent);
-  --viz-font-size: var(--font-size-base);
-  --viz-warning: var(--destructive);
-  --color-background-primary: var(--background);
-  --color-text-primary: var(--foreground);
-  --color-border-secondary: var(--border);
-}
-
-:root[data-theme=&quot;light&quot;] {
-  color-scheme: light;
-}
-
-:root[data-theme=&quot;dark&quot;] {
-  color-scheme: dark;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html &gt; body {
-  margin: 0;
-  padding: 5px;
-  color: var(--foreground);
-  background: transparent !important;
-  font-family: var(--font-sans);
-  font-size: var(--font-size-normal);
-  font-weight: var(--font-weight-normal);
-  line-height: var(--line-height-normal);
-}
-
-a {
-  color: color-mix(in srgb, var(--viz-accent) 80%, var(--viz-text) 20%);
-  cursor: pointer;
-  font-weight: var(--viz-font-weight-medium);
-  text-decoration: none;
-  text-underline-offset: 2px;
-}
-
-a:is(:hover, :focus-visible) {
-  text-decoration-line: underline;
-  text-decoration-style: dashed;
-  text-decoration-thickness: 0.5px;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p {
-  margin-block: 0;
-}
-
-h1 {
-  font-size: var(--font-size-h1);
-  font-weight: var(--font-weight-medium);
-  line-height: 1.25;
-}
-
-h2 {
-  font-size: var(--font-size-h2);
-  font-weight: var(--font-weight-medium);
-  line-height: 1.25;
-}
-
-h3,
-h4,
-h5,
-h6 {
-  font-size: var(--font-size-h3);
-  font-weight: var(--font-weight-medium);
-  line-height: 1.3;
-}
-
-b,
-strong,
-th {
-  font-weight: var(--font-weight-medium);
-}
-
-code:not(pre code) {
-  display: inline;
-  padding: 1px 6px;
-  border-radius: var(--radius-sm);
-  corner-shape: superellipse(1.5);
-  background: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 0.92em;
-  overflow-wrap: anywhere;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-  word-break: break-word;
-}
-
-#widget {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  padding: 0;
-  background: transparent !important;
-}
-
-.card {
-  min-width: 0;
-  padding: 12px;
-  overflow: hidden;
-  overflow-wrap: break-word;
-  border-radius: var(--radius-2xl);
-  corner-shape: superellipse(1.5);
-  color: var(--card-foreground);
-  background: var(--card);
-}
-
-#widget &gt; :not(.card) {
-  width: 100% !important;
-  max-width: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.tooltip {
-  position: fixed;
-  z-index: 50;
-  top: 0;
-  left: 0;
-  width: max-content;
-  max-width: min(
-    20rem,
-    var(--tooltip-available-width, calc(100vw - 10px)),
-    calc(100vw - 10px)
-  );
-  max-height: min(
-    var(--tooltip-available-height, calc(100vh - 10px)),
-    calc(100vh - 10px)
-  );
-  padding: 4px 8px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  corner-shape: superellipse(1.5);
-  color: var(--popover-foreground);
-  background: var(--popover);
-  box-shadow: none;
-  font-size: var(--font-size-tooltip);
-  line-height: var(--line-height-tooltip);
-  overflow-wrap: break-word;
-  white-space: normal;
-  pointer-events: none;
-  user-select: none;
-}
-
-.viz-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(max(180px, 24%), 1fr));
-  gap: 10px;
-}
-
-.viz-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.viz-stat-value {
-  font-size: var(--font-size-h2);
-  font-weight: var(--font-weight-medium);
-  line-height: 1.25;
-}
-
-.viz-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-}
-
-.viz-badge {
-  padding: 3px 8px;
-  border-radius: var(--radius-full);
-  color: var(--accent-foreground);
-  background: var(--accent);
-  font-weight: var(--font-weight-medium);
-}
-
-small,
-.text-small,
-.viz-badge {
-  font-size: var(--font-size-small);
-  line-height: var(--line-height-small);
-}
-
-.text-muted {
-  color: var(--muted-foreground);
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.viz-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.viz-controls &gt; .form-label {
-  display: grid;
-  min-width: min(100%, 260px);
-  flex: 1 1 280px;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: baseline;
-  gap: 2px 12px;
-  margin-bottom: 0;
-}
-
-.viz-controls &gt; .form-label &gt; :is(.form-control, .form-range, .form-select) {
-  grid-column: 1 / -1;
-}
-
-.btn,
-.form-check-input,
-.form-control,
-.form-range,
-.form-select {
-  font: inherit;
-}
-
-.btn {
-  appearance: button;
-  display: inline-flex;
-  inline-size: fit-content;
-  max-inline-size: 100%;
-  min-height: 28px;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  margin: 0;
-  padding: 0 8px;
-  -webkit-app-region: no-drag;
-  border: 1px solid var(--input);
-  border-radius: var(--radius-lg);
-  corner-shape: superellipse(1.5);
-  color: var(--secondary-foreground);
-  background: var(--secondary);
-  cursor: var(--cursor-interaction, pointer);
-  text-align: center;
-  text-decoration: none;
-  white-space: nowrap;
-  user-select: none;
-  -webkit-font-smoothing: antialiased;
-}
-
-.btn:is(.btn-block, .viz-tile) {
-  inline-size: 100%;
-}
-
-.btn.viz-tile {
-  min-width: 0;
-  overflow-wrap: anywhere;
-  white-space: normal;
-}
-
-a.btn {
-  cursor: pointer;
-  text-decoration: none;
-}
-
-.btn:not(:disabled):hover {
-  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
-}
-
-.btn-primary {
-  border-color: transparent;
-  color: var(--primary-foreground);
-  background: var(--foreground);
-  background-clip: padding-box;
-}
-
-.btn-primary .text-muted {
-  color: color-mix(in srgb, var(--primary-foreground) 50%, transparent);
-}
-
-.btn-primary:not(:disabled):hover {
-  background: color-mix(in srgb, var(--foreground) 80%, transparent);
-  background-clip: padding-box;
-}
-
-.btn-ghost {
-  border-color: transparent;
-  color: var(--muted-foreground);
-  background: transparent;
-}
-
-.btn-ghost:not(:disabled):hover {
-  color: var(--foreground);
-  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
-}
-
-.btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
-[data-lucide] {
-  stroke-width: 1.6;
-}
-
-.form-label {
-  display: block;
-  margin-bottom: 6px;
-  color: var(--foreground);
-}
-
-.form-control {
-  display: block;
-  width: 100%;
-  min-height: 28px;
-  padding: 0 8px;
-  outline: none;
-  border: 1px solid var(--input);
-  border-radius: var(--radius-lg);
-  corner-shape: superellipse(1.5);
-  color: var(--foreground);
-  background: var(--secondary);
-}
-
-.form-control::placeholder {
-  color: var(--muted-foreground);
-}
-
-.form-control[type=&quot;file&quot;] {
-  padding: 0;
-  overflow: hidden;
-  cursor: var(--cursor-interaction, pointer);
-}
-
-.form-control[type=&quot;file&quot;]::file-selector-button {
-  min-height: 26px;
-  margin-right: 8px;
-  padding: 0 8px;
-  border: 0;
-  border-right: 1px solid var(--input);
-  color: var(--secondary-foreground);
-  background: var(--secondary);
-  cursor: inherit;
-  font: inherit;
-}
-
-.form-control[type=&quot;file&quot;]:not(:disabled):hover::file-selector-button {
-  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
-}
-
-.form-control-color[type=&quot;color&quot;] {
-  width: 40px;
-  height: 28px;
-  padding: 3px;
-  cursor: var(--cursor-interaction, pointer);
-}
-
-.form-control-color[type=&quot;color&quot;]::-webkit-color-swatch-wrapper {
-  padding: 0;
-}
-
-.form-control-color[type=&quot;color&quot;]::-webkit-color-swatch {
-  border: 0;
-  border-radius: calc(var(--radius-lg) - 4px);
-  corner-shape: superellipse(1.5);
-}
-
-textarea.form-control {
-  height: auto;
-  min-height: 72px;
-  padding: 8px 10px;
-  resize: vertical;
-}
-
-.form-control:focus-visible {
-  border-color: var(--ring);
-  box-shadow: inset 0 0 0 1px var(--ring);
-}
-
-.form-control:disabled,
-.form-select:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
-.form-select {
-  appearance: none;
-  display: block;
-  width: 100%;
-  min-height: 28px;
-  margin: 0;
-  padding: 0 32px 0 8px;
-  outline: none;
-  border: 1px solid var(--input);
-  border-radius: var(--radius-lg);
-  corner-shape: superellipse(1.5);
-  color: var(--foreground);
-  background-color: var(--secondary);
-  background-image:
-    linear-gradient(45deg, transparent 50%, var(--muted-foreground) 50%),
-    linear-gradient(135deg, var(--muted-foreground) 50%, transparent 50%);
-  background-position:
-    calc(100% - 14px) 50%,
-    calc(100% - 10px) 50%;
-  background-repeat: no-repeat;
-  background-size: 4px 4px;
-  cursor: var(--cursor-interaction, default);
-}
-
-.form-select:not(:disabled):hover {
-  background-color: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
-}
-
-.form-select:focus-visible {
-  border-color: var(--ring);
-  box-shadow: inset 0 0 0 1px var(--ring);
-}
-
-.form-check {
-  display: flex;
-  min-height: 20px;
-  align-items: center;
-  gap: 6px;
-}
-
-.form-check-input {
-  appearance: none;
-  width: 14px;
-  height: 14px;
-  flex: 0 0 auto;
-  margin: 0;
-  border: 1px solid var(--input);
-  color: var(--primary-foreground);
-  background-color: transparent;
-  cursor: var(--cursor-interaction, default);
-  transition:
-    background-color 150ms,
-    border-color 150ms,
-    box-shadow 150ms;
-}
-
-.form-check:not(.form-switch) .form-check-input[type=&quot;checkbox&quot;] {
-  border-color: var(--input);
-  border-radius: var(--radius-sm);
-  corner-shape: superellipse(1.5);
-  background-color: var(--secondary);
-  box-shadow: var(--shadow-sm);
-}
-
-.form-check:not(.form-switch)
-  .form-check-input:not(:disabled):not(:checked):hover {
-  background-color: var(--card);
-}
-
-.form-check:not(.form-switch) .form-check-input[type=&quot;checkbox&quot;]:checked {
-  border-color: var(--primary);
-  background-color: var(--primary);
-}
-
-.form-check:not(.form-switch)
-  .form-check-input[type=&quot;checkbox&quot;]:checked::before {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: var(--primary-foreground);
-  content: &quot;&quot;;
-  mask: var(--checkmark-image) center / 12px 12px no-repeat;
-}
-
-.form-check-input[type=&quot;radio&quot;] {
-  width: 14px;
-  height: 14px;
-  border-radius: var(--radius-full);
-}
-
-.form-check-input[type=&quot;radio&quot;]:checked {
-  border: 2px solid var(--primary);
-  background:
-    radial-gradient(circle, var(--primary-foreground) 0 2.5px, transparent 3px),
-    var(--primary);
-}
-
-.form-check:not(.form-switch) .form-check-input:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
-
-.form-check:not(.form-switch) .form-check-input:disabled {
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-.form-check:not(.form-switch) .form-check-input:disabled + .form-check-label {
-  cursor: not-allowed;
-}
-
-.form-switch .form-check-input:disabled,
-.form-switch .form-check-input:disabled + .form-check-label {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.form-check-label {
-  color: var(--foreground);
-  cursor: var(--cursor-interaction, default);
-}
-
-.form-switch .form-check-input {
-  position: relative;
-  width: 32px;
-  height: 20px;
-  border: 0;
-  border-radius: var(--radius-full);
-  background: var(--muted);
-  box-shadow: none;
-  transition: background-color 200ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-.form-switch .form-check-input::before {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 16px;
-  height: 16px;
-  box-sizing: border-box;
-  border: 1px solid light-dark(var(--primary-foreground), var(--foreground));
-  border-radius: var(--radius-full);
-  background: light-dark(var(--primary-foreground), var(--foreground));
-  box-shadow: var(--shadow-sm);
-  content: &quot;&quot;;
-  transform: translate(2px, -50%);
-  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-.form-switch .form-check-input:checked {
-  background: var(--primary);
-}
-
-.form-switch .form-check-input:checked::before {
-  transform: translate(14px, -50%);
-}
-
-.form-switch .form-check-input:focus-visible {
-  box-shadow: 0 0 0 2px var(--ring);
-}
-
-.form-range {
-  appearance: none;
-  display: block;
-  width: 100%;
-  height: 28px;
-  flex: 1;
-  margin: 0;
-  padding: 0;
-  outline: none;
-  border: 0;
-  accent-color: var(--primary);
-  background: linear-gradient(
-      color-mix(in srgb, var(--foreground) 7%, transparent),
-      color-mix(in srgb, var(--foreground) 7%, transparent)
-    )
-    center / 100% 2px no-repeat;
-}
-
-.form-range::-webkit-slider-runnable-track {
-  height: 28px;
-  background: transparent;
-}
-
-.form-range::-webkit-slider-thumb {
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  margin-top: 4px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  background: light-dark(var(--primary-foreground), var(--foreground));
-}
-
-.form-range:focus-visible::-webkit-slider-thumb {
-  border-color: var(--ring);
-  box-shadow: inset 0 0 0 1px var(--ring);
-}
-
-.form-range::-moz-range-track {
-  height: 28px;
-  background: transparent;
-}
-
-.form-range::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  background: light-dark(var(--primary-foreground), var(--foreground));
-}
-
-.form-range:focus-visible::-moz-range-thumb {
-  border-color: var(--ring);
-  box-shadow: inset 0 0 0 1px var(--ring);
-}
-
-.form-range:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
-.btn:not(.btn-primary, .viz-tile):is(
-    [aria-pressed=&quot;true&quot;],
-    [aria-selected=&quot;true&quot;],
-    .is-selected
-  ) {
-  border-color: var(--primary);
-  color: var(--primary-foreground);
-  background: var(--primary);
-}
-
-.btn.viz-tile:is([aria-pressed=&quot;true&quot;], [aria-selected=&quot;true&quot;], .is-selected) {
-  border-color: var(--primary);
-  box-shadow: inset 0 0 0 1px var(--primary);
-}
-
-.btn:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
-
-svg {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
-
-#widget &gt; svg {
-  width: 100%;
-}
-
-.text-warning,
-.text-destructive {
-  color: var(--destructive);
-}
-
-html&gt;body{padding:0}&lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;section id=&quot;ai-chain-terminal-fallback&quot; aria-label=&quot;AI 产业链投研工作台&quot;&gt;
-  &lt;style&gt;
-    #ai-chain-terminal-fallback { color: var(--foreground); font-family: ui-sans-serif, system-ui, sans-serif; }
-    #ai-chain-terminal-fallback .terminal-bar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0 14px; border-bottom:1px solid var(--border); }
-    #ai-chain-terminal-fallback .brandline { display:flex; align-items:center; gap:10px; font-weight:500; }
-    #ai-chain-terminal-fallback .brandmark { display:grid; place-items:center; width:32px; height:32px; border:1px solid var(--viz-series-1); color:var(--viz-series-1); font-family:ui-monospace, monospace; }
-    #ai-chain-terminal-fallback .live { display:flex; align-items:center; gap:6px; color:var(--muted-foreground); }
-    #ai-chain-terminal-fallback .live i { width:7px; height:7px; border-radius:50%; background:var(--viz-series-1); }
-    #ai-chain-terminal-fallback .tabs { display:flex; flex-wrap:wrap; gap:6px; padding:14px 0; border-bottom:1px solid var(--border); }
-    #ai-chain-terminal-fallback .screen { display:none; padding-top:16px; }
-    #ai-chain-terminal-fallback .screen.is-active { display:block; }
-    #ai-chain-terminal-fallback .brief { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(240px,.7fr); gap:18px; padding:14px 0 20px; border-bottom:1px solid var(--border); }
-    #ai-chain-terminal-fallback .brief-copy { max-width:650px; }
-    #ai-chain-terminal-fallback .brief-copy strong { display:block; margin-bottom:8px; font-weight:500; }
-    #ai-chain-terminal-fallback .brief-copy p { color:var(--muted-foreground); margin:0; }
-    #ai-chain-terminal-fallback .gate { display:grid; gap:7px; }
-    #ai-chain-terminal-fallback .gate div { display:grid; grid-template-columns:28px 1fr auto; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--border); }
-    #ai-chain-terminal-fallback .gate span { color:var(--muted-foreground); }
-    #ai-chain-terminal-fallback .gate em { color:var(--viz-series-1); font-style:normal; font-family:ui-monospace, monospace; }
-    #ai-chain-terminal-fallback .gate div:last-child em { color:var(--viz-series-4); }
-    #ai-chain-terminal-fallback .metrics { margin:16px 0; }
-    #ai-chain-terminal-fallback .viz-stat-value { color:var(--viz-series-1); }
-    #ai-chain-terminal-fallback .split { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr); gap:22px; margin-top:20px; }
-    #ai-chain-terminal-fallback .section-head { display:flex; align-items:end; justify-content:space-between; gap:12px; padding-bottom:8px; border-bottom:1px solid var(--border); }
-    #ai-chain-terminal-fallback .section-head strong { font-weight:500; }
-    #ai-chain-terminal-fallback .section-head span { color:var(--muted-foreground); }
-    #ai-chain-terminal-fallback .bar-row { display:grid; grid-template-columns:92px 1fr 48px; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--border); }
-    #ai-chain-terminal-fallback .bar-track { height:8px; background:var(--muted); }
-    #ai-chain-terminal-fallback .bar-track i { display:block; height:100%; background:var(--viz-series-1); }
-    #ai-chain-terminal-fallback .bar-track i.estimate { background:var(--viz-series-2); }
-    #ai-chain-terminal-fallback .bar-row b { text-align:right; font-family:ui-monospace, monospace; font-weight:500; }
-    #ai-chain-terminal-fallback .rows button { display:grid; width:100%; grid-template-columns:70px 1fr auto; gap:10px; align-items:center; text-align:left; padding:10px 0; border:0; border-bottom:1px solid var(--border); color:var(--foreground); background:transparent; cursor:pointer; }
-    #ai-chain-terminal-fallback .rows button:hover { background:var(--accent); }
-    #ai-chain-terminal-fallback .rows button b { font-family:ui-monospace, monospace; font-weight:500; }
-    #ai-chain-terminal-fallback .rows button span { color:var(--muted-foreground); }
-    #ai-chain-terminal-fallback .detail { margin-top:12px; }
-    #ai-chain-terminal-fallback .detail strong { font-weight:500; }
-    #ai-chain-terminal-fallback .detail p { color:var(--muted-foreground); margin-bottom:0; }
-    #ai-chain-terminal-fallback .matrix { display:grid; grid-template-columns:1fr repeat(3,minmax(68px,.65fr)); align-items:center; }
-    #ai-chain-terminal-fallback .matrix &gt; * { padding:8px; border-bottom:1px solid var(--border); }
-    #ai-chain-terminal-fallback .matrix .cell { text-align:center; background:color-mix(in srgb,var(--viz-series-1) calc(var(--level) * .55%), transparent); }
-    #ai-chain-terminal-fallback table { width:100%; border-collapse:collapse; margin-top:10px; }
-    #ai-chain-terminal-fallback th, #ai-chain-terminal-fallback td { padding:10px 8px; text-align:left; border-bottom:1px solid var(--border); }
-    #ai-chain-terminal-fallback th { color:var(--muted-foreground); font-weight:400; }
-    #ai-chain-terminal-fallback td:first-child { font-family:ui-monospace, monospace; font-weight:500; }
-    #ai-chain-terminal-fallback .portfolio-grid { display:grid; grid-template-columns:minmax(260px,.7fr) minmax(0,1.3fr); gap:22px; }
-    #ai-chain-terminal-fallback .asset-row { display:grid; grid-template-columns:70px 1fr 48px; gap:8px; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); }
-    #ai-chain-terminal-fallback .asset-row b, #ai-chain-terminal-fallback .asset-row output { font-family:ui-monospace, monospace; font-weight:500; }
-    #ai-chain-terminal-fallback .asset-row output { text-align:right; }
-    #ai-chain-terminal-fallback .total-line { display:flex; justify-content:space-between; align-items:center; margin:12px 0; }
-    #ai-chain-terminal-fallback .total-line output { font-family:ui-monospace, monospace; color:var(--viz-series-1); }
-    #ai-chain-terminal-fallback .chart { display:flex; align-items:end; gap:8px; height:180px; padding:14px 0 0; border-bottom:1px solid var(--border); }
-    #ai-chain-terminal-fallback .chart div { flex:1; min-width:16px; background:var(--viz-series-1); opacity:.72; position:relative; }
-    #ai-chain-terminal-fallback .chart div span { position:absolute; bottom:calc(100% + 4px); width:100%; text-align:center; color:var(--muted-foreground); }
-    #ai-chain-terminal-fallback .alert-row { display:grid; grid-template-columns:40px 1fr auto; gap:10px; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); }
-    #ai-chain-terminal-fallback .alert-row b { font-family:ui-monospace, monospace; font-weight:500; }
-    #ai-chain-terminal-fallback .foot { margin-top:18px; padding-top:12px; border-top:1px solid var(--border); color:var(--muted-foreground); }
-    @media (max-width:640px) {
-      #ai-chain-terminal-fallback .terminal-bar, #ai-chain-terminal-fallback .brief { display:block; }
-      #ai-chain-terminal-fallback .live { margin-top:8px; }
-      #ai-chain-terminal-fallback .gate { margin-top:16px; }
-      #ai-chain-terminal-fallback .split, #ai-chain-terminal-fallback .portfolio-grid { grid-template-columns:1fr; }
-      #ai-chain-terminal-fallback .matrix { grid-template-columns:1fr repeat(3,56px); }
-      #ai-chain-terminal-fallback table { font-size:var(--font-size-base); }
-    }
-  &lt;/style&gt;
-  &lt;div class=&quot;terminal-bar&quot;&gt;
-    &lt;div class=&quot;brandline&quot;&gt;&lt;span class=&quot;brandmark&quot;&gt;AI&lt;/span&gt;&lt;span&gt;CHAIN INTELLIGENCE // PM TERMINAL&lt;/span&gt;&lt;/div&gt;
-    &lt;div class=&quot;live&quot;&gt;&lt;i&gt;&lt;/i&gt;&lt;span&gt;LIVE · 42 SIGNALS · 2026.07.18&lt;/span&gt;&lt;/div&gt;
-  &lt;/div&gt;
-  &lt;nav class=&quot;tabs&quot; aria-label=&quot;工作台导航&quot;&gt;
-    &lt;button class=&quot;btn btn-primary&quot; data-screen=&quot;overview&quot; aria-pressed=&quot;true&quot;&gt;总览&lt;/button&gt;
-    &lt;button class=&quot;btn&quot; data-screen=&quot;macro&quot; aria-pressed=&quot;false&quot;&gt;宏观观察&lt;/button&gt;
-    &lt;button class=&quot;btn&quot; data-screen=&quot;funds&quot; aria-pressed=&quot;false&quot;&gt;13F 资金&lt;/button&gt;
-    &lt;button class=&quot;btn&quot; data-screen=&quot;portfolio&quot; aria-pressed=&quot;false&quot;&gt;组合&lt;/button&gt;
-    &lt;button class=&quot;btn&quot; data-screen=&quot;trade&quot; aria-pressed=&quot;false&quot;&gt;交易时点&lt;/button&gt;
-    &lt;button class=&quot;btn&quot; data-screen=&quot;alerts&quot; aria-pressed=&quot;false&quot;&gt;告警&lt;/button&gt;
-  &lt;/nav&gt;
-
-  &lt;div class=&quot;screen is-active&quot; data-panel=&quot;overview&quot;&gt;
-    &lt;div class=&quot;brief&quot;&gt;
-      &lt;div class=&quot;brief-copy&quot;&gt;&lt;strong&gt;主线仍强，交易从追涨切换到回撤确认&lt;/strong&gt;&lt;p&gt;2026 Capex 与云增长继续验证需求，GPU、HBM 与先进封装保持结构性议价权；板块轮动后，动作取决于估值是否消化。&lt;/p&gt;&lt;/div&gt;
-      &lt;div class=&quot;gate&quot;&gt;&lt;div&gt;&lt;span&gt;01&lt;/span&gt;&lt;b&gt;需求超预期&lt;/b&gt;&lt;em&gt;PASS&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;02&lt;/span&gt;&lt;b&gt;供给有议价权&lt;/b&gt;&lt;em&gt;PASS&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;03&lt;/span&gt;&lt;b&gt;估值未透支&lt;/b&gt;&lt;em&gt;WATCH&lt;/em&gt;&lt;/div&gt;&lt;/div&gt;
-    &lt;/div&gt;
-    &lt;div class=&quot;viz-grid metrics&quot;&gt;
-      &lt;div class=&quot;card viz-stat&quot;&gt;&lt;span class=&quot;text-muted&quot;&gt;净多评分&lt;/span&gt;&lt;div class=&quot;viz-stat-value&quot;&gt;78&lt;/div&gt;&lt;span&gt;较上期 -4&lt;/span&gt;&lt;/div&gt;
-      &lt;div class=&quot;card viz-stat&quot;&gt;&lt;span class=&quot;text-muted&quot;&gt;Big5 2026E Capex&lt;/span&gt;&lt;div class=&quot;viz-stat-value&quot;&gt;$750B&lt;/div&gt;&lt;span&gt;公开指引中值&lt;/span&gt;&lt;/div&gt;
-      &lt;div class=&quot;card viz-stat&quot;&gt;&lt;span class=&quot;text-muted&quot;&gt;交付成熟信号&lt;/span&gt;&lt;div class=&quot;viz-stat-value&quot;&gt;0 / 4&lt;/div&gt;&lt;span&gt;阈值 ≥ 3&lt;/span&gt;&lt;/div&gt;
-    &lt;/div&gt;
-    &lt;div class=&quot;split&quot;&gt;
-      &lt;section&gt;&lt;div class=&quot;section-head&quot;&gt;&lt;strong&gt;Big5 Capex · 2026E&lt;/strong&gt;&lt;span&gt;USD BN&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;bar-row&quot;&gt;&lt;span&gt;Amazon&lt;/span&gt;&lt;div class=&quot;bar-track&quot;&gt;&lt;i style=&quot;width:100%&quot;&gt;&lt;/i&gt;&lt;/div&gt;&lt;b&gt;200&lt;/b&gt;&lt;/div&gt;&lt;div class=&quot;bar-row&quot;&gt;&lt;span&gt;Microsoft&lt;/span&gt;&lt;div class=&quot;bar-track&quot;&gt;&lt;i style=&quot;width:95%&quot;&gt;&lt;/i&gt;&lt;/div&gt;&lt;b&gt;190&lt;/b&gt;&lt;/div&gt;&lt;div class=&quot;bar-row&quot;&gt;&lt;span&gt;Alphabet&lt;/span&gt;&lt;div class=&quot;bar-track&quot;&gt;&lt;i style=&quot;width:90%&quot;&gt;&lt;/i&gt;&lt;/div&gt;&lt;b&gt;180&lt;/b&gt;&lt;/div&gt;&lt;div class=&quot;bar-row&quot;&gt;&lt;span&gt;Meta&lt;/span&gt;&lt;div class=&quot;bar-track&quot;&gt;&lt;i class=&quot;estimate&quot; style=&quot;width:63%&quot;&gt;&lt;/i&gt;&lt;/div&gt;&lt;b&gt;125&lt;/b&gt;&lt;/div&gt;&lt;div class=&quot;bar-row&quot;&gt;&lt;span&gt;Oracle*&lt;/span&gt;&lt;div class=&quot;bar-track&quot;&gt;&lt;i class=&quot;estimate&quot; style=&quot;width:28%&quot;&gt;&lt;/i&gt;&lt;/div&gt;&lt;b&gt;55&lt;/b&gt;&lt;/div&gt;&lt;/section&gt;
-      &lt;section&gt;&lt;div class=&quot;section-head&quot;&gt;&lt;strong&gt;重点公司&lt;/strong&gt;&lt;span&gt;点击查看&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;rows&quot;&gt;&lt;button data-name=&quot;NVDA&quot; data-detail=&quot;GPU 平台需求强，交易动作等待更优回撤位置。&quot;&gt;&lt;b&gt;NVDA&lt;/b&gt;&lt;span&gt;GPU 平台 · 评分 93&lt;/span&gt;&lt;span class=&quot;viz-badge&quot;&gt;等待&lt;/span&gt;&lt;/button&gt;&lt;button data-name=&quot;AVGO&quot; data-detail=&quot;ASIC 与网络具备结构性议价权，适合分批配置。&quot;&gt;&lt;b&gt;AVGO&lt;/b&gt;&lt;span&gt;ASIC / 网络 · 89&lt;/span&gt;&lt;span class=&quot;viz-badge&quot;&gt;分批&lt;/span&gt;&lt;/button&gt;&lt;button data-name=&quot;TSM&quot; data-detail=&quot;先进制程稀缺性较强，估值相对均衡。&quot;&gt;&lt;b&gt;TSM&lt;/b&gt;&lt;span&gt;先进制程 · 88&lt;/span&gt;&lt;span class=&quot;viz-badge&quot;&gt;加仓&lt;/span&gt;&lt;/button&gt;&lt;button data-name=&quot;MU&quot; data-detail=&quot;HBM 主线成立，但周期波动与库存需同步验证。&quot;&gt;&lt;b&gt;MU&lt;/b&gt;&lt;span&gt;HBM / 存储 · 84&lt;/span&gt;&lt;span class=&quot;viz-badge&quot;&gt;观察&lt;/span&gt;&lt;/button&gt;&lt;/div&gt;&lt;div class=&quot;card detail&quot; aria-live=&quot;polite&quot;&gt;&lt;strong&gt;NVDA&lt;/strong&gt;&lt;p&gt;GPU 平台需求强，交易动作等待更优回撤位置。&lt;/p&gt;&lt;/div&gt;&lt;/section&gt;
-    &lt;/div&gt;
-    &lt;div class=&quot;split&quot;&gt;&lt;section&gt;&lt;div class=&quot;section-head&quot;&gt;&lt;strong&gt;行业 ROI 热力矩阵&lt;/strong&gt;&lt;span&gt;0—100&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;matrix&quot;&gt;&lt;span&gt;行业&lt;/span&gt;&lt;span&gt;成熟&lt;/span&gt;&lt;span&gt;ROI&lt;/span&gt;&lt;span&gt;商业化&lt;/span&gt;&lt;b&gt;软件研发&lt;/b&gt;&lt;span class=&quot;cell&quot; style=&quot;--level:93&quot;&gt;93&lt;/span&gt;&lt;span class=&quot;cell&quot; style=&quot;--level:87&quot;&gt;87&lt;/span&gt;&lt;span class=&quot;cell&quot; style=&quot;--level:72&quot;&gt;72&lt;/span&gt;&lt;b&gt;广告营销&lt;/b&gt;&lt;span class=&quot;cell&quot; style=&quot;--level:91&quot;&gt;91&lt;/span&gt;&lt;span class=&quot;cell&quot; style=&quot;--level:84&quot;&gt;84&lt;/span&gt;&lt;span class=&quot;cell&quot; style=&quot;--level:79&quot;&gt;79&lt;/span&gt;&lt;b&gt;金融服务&lt;/b&gt;&lt;span class=&quot;cell&quot; style=&quot;--level:84&quot;&gt;84&lt;/span&gt;&lt;span class=&quot;cell&quot; style=&quot;--level:76&quot;&gt;76&lt;/span&gt;&lt;span class=&quot;cell&quot; style=&quot;--level:61&quot;&gt;61&lt;/span&gt;&lt;b&gt;医疗健康&lt;/b&gt;&lt;span class=&quot;cell&quot; style=&quot;--level:78&quot;&gt;78&lt;/span&gt;&lt;span class=&quot;cell&quot; style=&quot;--level:69&quot;&gt;69&lt;/span&gt;&lt;span class=&quot;cell&quot; style=&quot;--level:58&quot;&gt;58&lt;/span&gt;&lt;/div&gt;&lt;/section&gt;&lt;section&gt;&lt;div class=&quot;section-head&quot;&gt;&lt;strong&gt;Signal Feed&lt;/strong&gt;&lt;span&gt;VERIFIED&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;rows&quot;&gt;&lt;button data-name=&quot;07-17&quot; data-detail=&quot;芯片板块出现轮动回撤，趋势未被证伪，交易性价比转向等待确认。&quot;&gt;&lt;b&gt;07-17&lt;/b&gt;&lt;span&gt;AI 芯片板块显著回撤&lt;/span&gt;&lt;span class=&quot;viz-badge&quot;&gt;观察&lt;/span&gt;&lt;/button&gt;&lt;button data-name=&quot;06-25&quot; data-detail=&quot;Oracle FY26 RPO 达 6380 亿美元，大型 AI 合同验证算力需求。&quot;&gt;&lt;b&gt;06-25&lt;/b&gt;&lt;span&gt;Oracle RPO $638B&lt;/span&gt;&lt;span class=&quot;viz-badge&quot;&gt;利好&lt;/span&gt;&lt;/button&gt;&lt;button data-name=&quot;04-29&quot; data-detail=&quot;微软 2026 日历年 Capex 约 1900 亿美元，供给约束仍在。&quot;&gt;&lt;b&gt;04-29&lt;/b&gt;&lt;span&gt;Microsoft Capex $190B&lt;/span&gt;&lt;span class=&quot;viz-badge&quot;&gt;利好&lt;/span&gt;&lt;/button&gt;&lt;/div&gt;&lt;/section&gt;&lt;/div&gt;
-  &lt;/div&gt;
-
-  &lt;div class=&quot;screen&quot; data-panel=&quot;macro&quot;&gt;&lt;div class=&quot;section-head&quot;&gt;&lt;strong&gt;宏观传导&lt;/strong&gt;&lt;span&gt;盈利预期 vs PE / 贴现率&lt;/span&gt;&lt;/div&gt;&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;指标&lt;/th&gt;&lt;th&gt;当前&lt;/th&gt;&lt;th&gt;影响&lt;/th&gt;&lt;th&gt;下次节点&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;实际利率&lt;/td&gt;&lt;td&gt;高位震荡&lt;/td&gt;&lt;td&gt;PE / 贴现率&lt;/td&gt;&lt;td&gt;FOMC · 07-29&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;美元指数&lt;/td&gt;&lt;td&gt;偏强&lt;/td&gt;&lt;td&gt;海外收入折算&lt;/td&gt;&lt;td&gt;每日&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;电力成本&lt;/td&gt;&lt;td&gt;结构性上行&lt;/td&gt;&lt;td&gt;DC 毛利 / 交付&lt;/td&gt;&lt;td&gt;EIA · 07-28&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;铜与设备&lt;/td&gt;&lt;td&gt;需求偏强&lt;/td&gt;&lt;td&gt;建设成本&lt;/td&gt;&lt;td&gt;PMI · 08-03&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;出口管制&lt;/td&gt;&lt;td&gt;高风险&lt;/td&gt;&lt;td&gt;可服务市场&lt;/td&gt;&lt;td&gt;BIS 跟踪&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;流动性&lt;/td&gt;&lt;td&gt;中性&lt;/td&gt;&lt;td&gt;风险偏好&lt;/td&gt;&lt;td&gt;每周&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;
-  &lt;div class=&quot;screen&quot; data-panel=&quot;funds&quot;&gt;&lt;div class=&quot;section-head&quot;&gt;&lt;strong&gt;13F 全景资金动向&lt;/strong&gt;&lt;span&gt;Q1 2026 · 披露滞后&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;split&quot;&gt;&lt;section&gt;&lt;div class=&quot;bar-row&quot;&gt;&lt;span&gt;NVDA&lt;/span&gt;&lt;div class=&quot;bar-track&quot;&gt;&lt;i style=&quot;width:86%&quot;&gt;&lt;/i&gt;&lt;/div&gt;&lt;b&gt;+86&lt;/b&gt;&lt;/div&gt;&lt;div class=&quot;bar-row&quot;&gt;&lt;span&gt;AVGO&lt;/span&gt;&lt;div class=&quot;bar-track&quot;&gt;&lt;i style=&quot;width:72%&quot;&gt;&lt;/i&gt;&lt;/div&gt;&lt;b&gt;+72&lt;/b&gt;&lt;/div&gt;&lt;div class=&quot;bar-row&quot;&gt;&lt;span&gt;TSM&lt;/span&gt;&lt;div class=&quot;bar-track&quot;&gt;&lt;i style=&quot;width:64%&quot;&gt;&lt;/i&gt;&lt;/div&gt;&lt;b&gt;+64&lt;/b&gt;&lt;/div&gt;&lt;div class=&quot;bar-row&quot;&gt;&lt;span&gt;MSFT&lt;/span&gt;&lt;div class=&quot;bar-track&quot;&gt;&lt;i class=&quot;estimate&quot; style=&quot;width:22%&quot;&gt;&lt;/i&gt;&lt;/div&gt;&lt;b&gt;-22&lt;/b&gt;&lt;/div&gt;&lt;/section&gt;&lt;div class=&quot;card detail&quot;&gt;&lt;strong&gt;共识结论&lt;/strong&gt;&lt;p&gt;资金继续偏向 GPU、ASIC / 网络与先进制程等盈利确定性上游。13F 为季末持仓，不代表实时交易。&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
-  &lt;div class=&quot;screen&quot; data-panel=&quot;portfolio&quot;&gt;&lt;div class=&quot;portfolio-grid&quot;&gt;&lt;section&gt;&lt;div class=&quot;section-head&quot;&gt;&lt;strong&gt;组合权重&lt;/strong&gt;&lt;button class=&quot;btn&quot; id=&quot;normalize-pf&quot;&gt;归一化&lt;/button&gt;&lt;/div&gt;&lt;div id=&quot;asset-controls&quot;&gt;&lt;/div&gt;&lt;div class=&quot;total-line&quot;&gt;&lt;span&gt;当前权重&lt;/span&gt;&lt;output id=&quot;pf-total&quot;&gt;100%&lt;/output&gt;&lt;/div&gt;&lt;/section&gt;&lt;section&gt;&lt;div class=&quot;section-head&quot;&gt;&lt;strong&gt;12M 回测形态&lt;/strong&gt;&lt;span&gt;研究演示&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;chart&quot; aria-label=&quot;组合近十二个月净值走势&quot;&gt;&lt;div style=&quot;height:38%&quot;&gt;&lt;span&gt;08&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;height:44%&quot;&gt;&lt;span&gt;09&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;height:51%&quot;&gt;&lt;span&gt;10&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;height:47%&quot;&gt;&lt;span&gt;11&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;height:61%&quot;&gt;&lt;span&gt;12&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;height:68%&quot;&gt;&lt;span&gt;01&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;height:63%&quot;&gt;&lt;span&gt;02&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;height:76%&quot;&gt;&lt;span&gt;03&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;height:84%&quot;&gt;&lt;span&gt;04&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;height:77%&quot;&gt;&lt;span&gt;05&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;height:91%&quot;&gt;&lt;span&gt;06&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;height:86%&quot;&gt;&lt;span&gt;07&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;viz-grid metrics&quot;&gt;&lt;div class=&quot;card viz-stat&quot;&gt;&lt;span class=&quot;text-muted&quot;&gt;区间收益&lt;/span&gt;&lt;div class=&quot;viz-stat-value&quot;&gt;+31.8%&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;card viz-stat&quot;&gt;&lt;span class=&quot;text-muted&quot;&gt;最大回撤&lt;/span&gt;&lt;div class=&quot;viz-stat-value&quot;&gt;-14.2%&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;card viz-stat&quot;&gt;&lt;span class=&quot;text-muted&quot;&gt;Sharpe&lt;/span&gt;&lt;div class=&quot;viz-stat-value&quot;&gt;1.42&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/section&gt;&lt;/div&gt;&lt;/div&gt;
-  &lt;div class=&quot;screen&quot; data-panel=&quot;trade&quot;&gt;&lt;div class=&quot;section-head&quot;&gt;&lt;strong&gt;逐标的交易时点&lt;/strong&gt;&lt;span&gt;规则评分 · 非自动交易&lt;/span&gt;&lt;/div&gt;&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;标的&lt;/th&gt;&lt;th&gt;动作&lt;/th&gt;&lt;th&gt;评分&lt;/th&gt;&lt;th&gt;距 MA20&lt;/th&gt;&lt;th&gt;状态&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;NVDA&lt;/td&gt;&lt;td&gt;等待&lt;/td&gt;&lt;td&gt;82&lt;/td&gt;&lt;td&gt;-3.8%&lt;/td&gt;&lt;td&gt;正常&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;AVGO&lt;/td&gt;&lt;td&gt;分批&lt;/td&gt;&lt;td&gt;86&lt;/td&gt;&lt;td&gt;-1.4%&lt;/td&gt;&lt;td&gt;正常&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;TSM&lt;/td&gt;&lt;td&gt;加仓&lt;/td&gt;&lt;td&gt;89&lt;/td&gt;&lt;td&gt;-4.9%&lt;/td&gt;&lt;td&gt;买入区&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;MU&lt;/td&gt;&lt;td&gt;观察&lt;/td&gt;&lt;td&gt;71&lt;/td&gt;&lt;td&gt;-8.1%&lt;/td&gt;&lt;td&gt;高波动&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;ASML&lt;/td&gt;&lt;td&gt;分批&lt;/td&gt;&lt;td&gt;78&lt;/td&gt;&lt;td&gt;-5.7%&lt;/td&gt;&lt;td&gt;接近区间&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;SOXX&lt;/td&gt;&lt;td&gt;加仓&lt;/td&gt;&lt;td&gt;84&lt;/td&gt;&lt;td&gt;-6.2%&lt;/td&gt;&lt;td&gt;买入区&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;
-  &lt;div class=&quot;screen&quot; data-panel=&quot;alerts&quot;&gt;&lt;div class=&quot;section-head&quot;&gt;&lt;strong&gt;告警订阅&lt;/strong&gt;&lt;span id=&quot;alert-count&quot;&gt;6 / 9 已开启&lt;/span&gt;&lt;/div&gt;&lt;div id=&quot;alert-controls&quot;&gt;&lt;/div&gt;&lt;/div&gt;
-  &lt;div class=&quot;foot text-small&quot;&gt;公开资料研究演示，不构成投资建议。价格、持仓与监管信息需在交易前独立核验。&lt;/div&gt;
-  &lt;script&gt;
-    (function(){
-      var root=document.getElementById(&#x27;ai-chain-terminal-fallback&#x27;);
-      var tabButtons=[].slice.call(root.querySelectorAll(&#x27;[data-screen]&#x27;));
-      var panels=[].slice.call(root.querySelectorAll(&#x27;[data-panel]&#x27;));
-      tabButtons.forEach(function(btn){btn.addEventListener(&#x27;click&#x27;,function(){tabButtons.forEach(function(x){x.classList.remove(&#x27;btn-primary&#x27;);x.setAttribute(&#x27;aria-pressed&#x27;,&#x27;false&#x27;)});panels.forEach(function(x){x.classList.remove(&#x27;is-active&#x27;)});btn.classList.add(&#x27;btn-primary&#x27;);btn.setAttribute(&#x27;aria-pressed&#x27;,&#x27;true&#x27;);root.querySelector(&#x27;[data-panel=&quot;&#x27;+btn.dataset.screen+&#x27;&quot;]&#x27;).classList.add(&#x27;is-active&#x27;)})});
-      root.querySelectorAll(&#x27;.rows button[data-detail]&#x27;).forEach(function(btn){btn.addEventListener(&#x27;click&#x27;,function(){var box=btn.closest(&#x27;section&#x27;).querySelector(&#x27;.detail&#x27;)||root.querySelector(&#x27;.detail&#x27;);if(box){box.querySelector(&#x27;strong&#x27;).textContent=btn.dataset.name;box.querySelector(&#x27;p&#x27;).textContent=btn.dataset.detail}})});
-      var assets=[[&#x27;NVDA&#x27;,18],[&#x27;AVGO&#x27;,14],[&#x27;TSM&#x27;,14],[&#x27;MU&#x27;,8],[&#x27;ASML&#x27;,8],[&#x27;AMZN&#x27;,10],[&#x27;MSFT&#x27;,10],[&#x27;SOXX&#x27;,10],[&#x27;QQQ&#x27;,8]];
-      var ac=root.querySelector(&#x27;#asset-controls&#x27;);
-      assets.forEach(function(a){var row=document.createElement(&#x27;label&#x27;);row.className=&#x27;asset-row&#x27;;row.innerHTML=&#x27;&lt;b&gt;&#x27;+a[0]+&#x27;&lt;/b&gt;&lt;input class=&quot;form-range&quot; type=&quot;range&quot; min=&quot;0&quot; max=&quot;30&quot; value=&quot;&#x27;+a[1]+&#x27;&quot; aria-label=&quot;&#x27;+a[0]+&#x27; 权重&quot;&gt;&lt;output&gt;&#x27;+a[1]+&#x27;%&lt;/output&gt;&#x27;;ac.appendChild(row)});
-      function updateTotal(){var total=0;ac.querySelectorAll(&#x27;input&#x27;).forEach(function(i){total+=Number(i.value);i.nextElementSibling.textContent=i.value+&#x27;%&#x27;});root.querySelector(&#x27;#pf-total&#x27;).textContent=total+&#x27;%&#x27;}
-      ac.addEventListener(&#x27;input&#x27;,updateTotal);
-      root.querySelector(&#x27;#normalize-pf&#x27;).addEventListener(&#x27;click&#x27;,function(){var inputs=[].slice.call(ac.querySelectorAll(&#x27;input&#x27;));var total=inputs.reduce(function(s,i){return s+Number(i.value)},0);if(!total)return;var used=0;inputs.forEach(function(i,n){var v=n===inputs.length-1?100-used:Math.round(Number(i.value)/total*100);used+=v;i.value=v});updateTotal()});
-      var alertNames=[&#x27;NVDA / AVGO 新 IR 公告&#x27;,&#x27;TSMC 财报当日提醒&#x27;,&#x27;HBM 现货价 ±5% 异动&#x27;,&#x27;传闻风险评级转红&#x27;,&#x27;云厂 Capex 指引上 / 下修&#x27;,&#x27;对华出口管制新政&#x27;,&#x27;光模块订单 / 价格变动&#x27;,&#x27;AI 电力 PPA 签约&#x27;,&#x27;数据中心成熟信号共振&#x27;];
-      var alertOn=[true,true,true,true,true,false,false,false,true];var alc=root.querySelector(&#x27;#alert-controls&#x27;);
-      alertNames.forEach(function(name,i){var row=document.createElement(&#x27;div&#x27;);row.className=&#x27;alert-row&#x27;;row.innerHTML=&#x27;&lt;b&gt;r&#x27;+(i+1)+&#x27;&lt;/b&gt;&lt;span&gt;&#x27;+name+&#x27;&lt;/span&gt;&lt;label class=&quot;form-check form-switch&quot;&gt;&lt;input class=&quot;form-check-input&quot; type=&quot;checkbox&quot; &#x27;+(alertOn[i]?&#x27;checked&#x27;:&#x27;&#x27;)+&#x27; aria-label=&quot;&#x27;+name+&#x27;&quot;&gt;&lt;span class=&quot;form-check-label&quot;&gt;&#x27;+(alertOn[i]?&#x27;开&#x27;:&#x27;关&#x27;)+&#x27;&lt;/span&gt;&lt;/label&gt;&#x27;;alc.appendChild(row)});
-      alc.addEventListener(&#x27;change&#x27;,function(e){if(e.target.matches(&#x27;input&#x27;)){e.target.nextElementSibling.textContent=e.target.checked?&#x27;开&#x27;:&#x27;关&#x27;;var count=alc.querySelectorAll(&#x27;input:checked&#x27;).length;root.querySelector(&#x27;#alert-count&#x27;).textContent=count+&#x27; / 9 已开启&#x27;}});
-    }());
-  &lt;/script&gt;
-&lt;/section&gt;
-
-&lt;script src=&quot;https://unpkg.com/@floating-ui/core@1.7.3/dist/floating-ui.core.umd.min.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;https://unpkg.com/@floating-ui/dom@1.7.4/dist/floating-ui.dom.umd.min.js&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-(() =&gt; {
-  if (window.FloatingUIDOM == null) {
-    return;
+  <div class="app">
+    <header class="topbar">
+      <button class="brand" id="brandHome" aria-label="返回总览">
+        <span class="brand-mark">AI</span>
+        <span><strong>AI 产业链 · 投研工作台</strong><small>BLOOMBERG-STYLE · PM VIEW</small></span>
+      </button>
+      <div class="live-pill"><i></i> LIVE · <b id="liveCount">—</b> SIGNALS</div>
+      <label class="snapshot-control"><span>▣ 看板日期</span><select id="snapshotSelect" aria-label="历史快照"></select></label>
+      <nav class="main-tabs" id="mainTabs" aria-label="主导航">
+        <button data-tab="overview" class="active">总览 Overview</button>
+        <button data-tab="macro">宏观观察</button>
+        <button data-tab="funds">13F 全景资金动向</button>
+        <button data-tab="portfolio">组合 Portfolio</button>
+        <button data-tab="trade">交易时点提示</button>
+        <button data-tab="alerts">告警 Alerts</button>
+      </nav>
+      <div class="search" role="search">
+        <span>⌕</span><input id="globalSearch" placeholder="搜索公司 / 代码 / 板块 / 事件…" aria-label="全局搜索" autocomplete="off" /><kbd>Ctrl+K</kbd>
+        <div class="search-results hidden" id="searchResults"></div>
+      </div>
+      <button class="icon-btn" id="themeBtn" title="切换主题" aria-label="切换主题">◐</button>
+    </header>
+    <div class="snapshot-banner hidden" id="snapshotBanner"></div>
+
+    <section class="screen active" id="screen-overview">
+      <div class="workspace">
+        <aside class="toc" id="toc"></aside>
+        <main class="overview-main" id="overviewMain"></main>
+      </div>
+    </section>
+    <section class="screen" id="screen-macro"><main class="tab-page" id="macroPage"></main></section>
+    <section class="screen" id="screen-funds"><main class="tab-page" id="fundsPage"></main></section>
+    <section class="screen" id="screen-portfolio"><main class="tab-page" id="portfolioPage"></main></section>
+    <section class="screen" id="screen-trade"><main class="tab-page" id="tradePage"></main></section>
+    <section class="screen" id="screen-alerts"><main class="tab-page" id="alertsPage"></main></section>
+
+    <div class="drawer-mask" id="drawerMask"></div>
+    <aside class="drawer" id="drawer" aria-hidden="true" aria-label="详情面板">
+      <header class="drawer-head">
+        <button id="drawerBack" aria-label="返回上一级">←</button>
+        <div><small id="drawerEyebrow">DETAIL</small><h2 id="drawerTitle">详情</h2></div>
+        <button id="drawerClose" aria-label="关闭详情">×</button>
+      </header>
+      <div class="drawer-body" id="drawerBody"></div>
+    </aside>
+    <button class="whatsnew-btn" id="whatsnewBtn" aria-label="查看今日更新">♟<b id="whatsnewBadge">0</b></button>
+    <div class="toast" id="toast" role="status"></div>
+  </div>
+<script>
+(function () {
+  var APP = window.APP = window.APP || {};
+  var stack = [];
+  var els = {};
+
+  function escapeHtml(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
   }
-  const { autoUpdate, computePosition, flip, offset, shift, size } =
-    window.FloatingUIDOM;
-  const tooltipPlacements = new Set([&quot;top&quot;, &quot;right&quot;, &quot;bottom&quot;, &quot;left&quot;]);
-  const tooltipId = `codex-visualization-tooltip-${
-    window.crypto?.randomUUID?.() ?? Date.now().toString(36)
-  }`;
-  const tooltipGap = 5;
-  const hoverDelay = 700;
-  const skipDelay = 300;
-  let activeTrigger = null;
-  let pendingTrigger = null;
-  let tooltip = null;
-  let openTimeout = null;
-  let autoUpdateCleanup = null;
-  let positionRequest = 0;
-  let skipDelayUntil = 0;
 
-  const getTrigger = (target) =&gt;
-    target?.nodeType === Node.ELEMENT_NODE
-      ? target.closest(&quot;[data-tooltip]&quot;)
-      : null;
-  const containsTarget = (trigger, target) =&gt;
-    target?.nodeType != null &amp;&amp; trigger.contains(target);
-  const getContent = (trigger) =&gt;
-    trigger.getAttribute(&quot;data-tooltip&quot;)?.trim() ?? &quot;&quot;;
-  const getPlacement = (trigger) =&gt; {
-    const placement = trigger.getAttribute(&quot;data-tooltip-placement&quot;);
-    return tooltipPlacements.has(placement) ? placement : &quot;top&quot;;
+  function badge(value, tone) {
+    return '<span class="badge ' + escapeHtml(tone || "neutral") + '">' + escapeHtml(value) + '</span>';
+  }
+
+  function credibility(value) {
+    var cls = value === "权威" ? "" : value === "较可信" ? "mid" : "low";
+    return '<span class="cred ' + cls + '" title="来源可信度：' + escapeHtml(value) + '">' + escapeHtml(value) + '</span>';
+  }
+
+  function render(item, restore) {
+    if (!els.drawer) return;
+    els.eyebrow.textContent = item.eyebrow || "DETAIL";
+    els.title.textContent = item.title || "详情";
+    els.body.innerHTML = item.html || "";
+    els.back.style.visibility = stack.length > 1 ? "visible" : "hidden";
+    els.drawer.classList.add("open");
+    els.mask.classList.add("open");
+    els.drawer.setAttribute("aria-hidden", "false");
+    requestAnimationFrame(function () { els.body.scrollTop = restore || 0; });
+  }
+
+  APP.escape = escapeHtml;
+  APP.badge = badge;
+  APP.credibility = credibility;
+  APP.drawer = {
+    open: function (item) {
+      if (stack.length) stack[stack.length - 1].scroll = els.body.scrollTop;
+      stack.push({ item: item, scroll: 0 });
+      render(item, 0);
+    },
+    back: function () {
+      if (stack.length <= 1) return APP.drawer.close();
+      stack.pop();
+      var previous = stack[stack.length - 1];
+      render(previous.item, previous.scroll);
+    },
+    close: function () {
+      stack = [];
+      if (!els.drawer) return;
+      els.drawer.classList.remove("open");
+      els.mask.classList.remove("open");
+      els.drawer.setAttribute("aria-hidden", "true");
+    },
+    depth: function () { return stack.length; }
   };
-  const getTooltip = () =&gt; {
-    if (tooltip == null) {
-      tooltip = document.createElement(&quot;div&quot;);
-      tooltip.id = tooltipId;
-      tooltip.className = &quot;tooltip&quot;;
-      tooltip.setAttribute(&quot;role&quot;, &quot;tooltip&quot;);
-    }
-    return tooltip;
-  };
-  const setDescribedBy = (trigger, described) =&gt; {
-    const ids = new Set(
-      (trigger.getAttribute(&quot;aria-describedby&quot;) ?? &quot;&quot;)
-        .split(/\s+/)
-        .filter(Boolean),
-    );
-    if (described) {
-      ids.add(tooltipId);
-    } else {
-      ids.delete(tooltipId);
-    }
-    if (ids.size === 0) {
-      trigger.removeAttribute(&quot;aria-describedby&quot;);
-    } else {
-      trigger.setAttribute(&quot;aria-describedby&quot;, [...ids].join(&quot; &quot;));
-    }
-  };
-  const clearOpenTimeout = () =&gt; {
-    if (openTimeout != null) {
-      window.clearTimeout(openTimeout);
-      openTimeout = null;
-    }
-    pendingTrigger = null;
-  };
-  const closeTooltip = (activateSkipDelay = true) =&gt; {
-    clearOpenTimeout();
-    positionRequest += 1;
-    autoUpdateCleanup?.();
-    autoUpdateCleanup = null;
-    if (activeTrigger == null) {
-      return;
-    }
-    setDescribedBy(activeTrigger, false);
-    activeTrigger = null;
-    tooltip?.remove();
-    if (activateSkipDelay) {
-      skipDelayUntil = Date.now() + skipDelay;
-    }
-  };
-  const updatePosition = (trigger, floating) =&gt; {
-    const request = ++positionRequest;
-    void computePosition(trigger, floating, {
-      middleware: [
-        offset(tooltipGap),
-        flip({ padding: tooltipGap }),
-        shift({ padding: tooltipGap }),
-        size({
-          padding: tooltipGap,
-          apply({ availableHeight, availableWidth, elements }) {
-            elements.floating.style.setProperty(
-              &quot;--tooltip-available-width&quot;,
-              `${Math.max(0, availableWidth)}px`,
-            );
-            elements.floating.style.setProperty(
-              &quot;--tooltip-available-height&quot;,
-              `${Math.max(0, availableHeight)}px`,
-            );
-          },
-        }),
-      ],
-      placement: getPlacement(trigger),
-      strategy: &quot;fixed&quot;,
-    })
-      .then(({ x, y }) =&gt; {
-        if (activeTrigger !== trigger || request !== positionRequest) {
-          return;
-        }
-        const scale = window.devicePixelRatio || 1;
-        floating.style.transform = `translate(${Math.round(x * scale) / scale}px, ${Math.round(y * scale) / scale}px)`;
-        floating.style.visibility = &quot;visible&quot;;
-      })
-      .catch(() =&gt; {
-        if (activeTrigger === trigger &amp;&amp; request === positionRequest) {
-          closeTooltip(false);
-        }
-      });
-  };
-  const openTooltip = (trigger) =&gt; {
-    const content = getContent(trigger);
-    if (!trigger.isConnected || content.length === 0) {
-      return;
-    }
-    clearOpenTimeout();
-    if (activeTrigger === trigger) {
-      return;
-    }
-    closeTooltip();
-    const floating = getTooltip();
-    floating.textContent = content;
-    floating.style.visibility = &quot;hidden&quot;;
-    floating.style.transform = &quot;translate(0, 0)&quot;;
-    document.body.appendChild(floating);
-    activeTrigger = trigger;
-    setDescribedBy(trigger, true);
-    autoUpdateCleanup = autoUpdate(trigger, floating, () =&gt; {
-      updatePosition(trigger, floating);
+
+  APP.note = function (key) {
+    var note = (window.DATA.notes || {})[key] || "暂无说明。";
+    APP.drawer.open({
+      eyebrow: "METHODOLOGY NOTE",
+      title: "口径说明",
+      html: '<p>' + escapeHtml(note) + '</p><div class="logic-box"><b>原则</b><span>需求超预期 × 供给紧张或有议价权 × 尚未被估值透支</span><b>使用方式</b><span>说明用于解释评分与展示口径，不构成投资建议。</span></div>'
     });
   };
-  const requestOpen = (trigger, immediate = false) =&gt; {
-    if (
-      getContent(trigger).length === 0 ||
-      activeTrigger === trigger ||
-      pendingTrigger === trigger
-    ) {
-      return;
-    }
-    clearOpenTimeout();
-    pendingTrigger = trigger;
-    const delay =
-      immediate || activeTrigger != null || Date.now() &lt; skipDelayUntil
-        ? 0
-        : hoverDelay;
-    if (delay === 0) {
-      openTooltip(trigger);
-      return;
-    }
-    openTimeout = window.setTimeout(() =&gt; {
-      openTimeout = null;
-      pendingTrigger = null;
-      openTooltip(trigger);
-    }, delay);
-  };
-  const handlePointerOpen = (event) =&gt; {
-    if (event.pointerType === &quot;touch&quot;) {
-      return;
-    }
-    const trigger = getTrigger(event.target);
-    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
-      return;
-    }
-    requestOpen(trigger);
-  };
-  const handleLeave = (event) =&gt; {
-    const trigger = getTrigger(event.target);
-    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
-      return;
-    }
-    if (activeTrigger === trigger || pendingTrigger === trigger) {
-      closeTooltip();
-    }
-  };
-  const handleFocusIn = (event) =&gt; {
-    const trigger = getTrigger(event.target);
-    if (trigger?.matches(&quot;:focus-visible&quot;)) {
-      requestOpen(trigger, true);
-    }
-  };
-  const handleKeyDown = (event) =&gt; {
-    if (event.key === &quot;Escape&quot;) {
-      closeTooltip();
-    }
-  };
-  const handleContextMenu = (event) =&gt; {
-    const trigger = getTrigger(event.target);
-    if (activeTrigger === trigger || pendingTrigger === trigger) {
-      closeTooltip();
-    }
-  };
-  const destroy = () =&gt; {
-    closeTooltip(false);
-    document.removeEventListener(&quot;pointerover&quot;, handlePointerOpen);
-    document.removeEventListener(&quot;pointerout&quot;, handleLeave);
-    document.removeEventListener(&quot;focusin&quot;, handleFocusIn);
-    document.removeEventListener(&quot;focusout&quot;, handleLeave);
-    document.removeEventListener(&quot;keydown&quot;, handleKeyDown);
-    document.removeEventListener(&quot;contextmenu&quot;, handleContextMenu);
-    tooltip = null;
-  };
 
-  document.addEventListener(&quot;pointerover&quot;, handlePointerOpen);
-  document.addEventListener(&quot;pointerout&quot;, handleLeave);
-  document.addEventListener(&quot;focusin&quot;, handleFocusIn);
-  document.addEventListener(&quot;focusout&quot;, handleLeave);
-  document.addEventListener(&quot;keydown&quot;, handleKeyDown);
-  document.addEventListener(&quot;contextmenu&quot;, handleContextMenu);
-  window.addEventListener(&quot;pagehide&quot;, destroy, { once: true });
-})();
-&lt;/script&gt;
-&lt;script id=&quot;codex-visualization-lucide&quot; async src=&quot;https://unpkg.com/lucide@1.17.0/dist/umd/lucide.js&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-(() =&gt; {
-  const initialize = () =&gt; {
-    globalThis.lucide?.createIcons({ attrs: { width: 16, height: 16 } });
+  APP.initDrawer = function () {
+    els = {
+      drawer: document.getElementById("drawer"), mask: document.getElementById("drawerMask"),
+      body: document.getElementById("drawerBody"), title: document.getElementById("drawerTitle"),
+      eyebrow: document.getElementById("drawerEyebrow"), back: document.getElementById("drawerBack")
+    };
+    document.getElementById("drawerClose").addEventListener("click", APP.drawer.close);
+    els.back.addEventListener("click", APP.drawer.back);
+    els.mask.addEventListener("click", APP.drawer.close);
+    document.addEventListener("keydown", function (event) { if (event.key === "Escape") APP.drawer.close(); });
   };
-  if (globalThis.lucide != null) {
-    initialize();
-    return;
+}());
+
+
+(function () {
+  var APP = window.APP = window.APP || {};
+  var KEY = "aime_pf_schemes_v2";
+  var state = { weights: {}, query: "", period: "12M", schemes: [] };
+
+  function readSchemes() {
+    try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (_) { return []; }
   }
-  document
-    .getElementById(&quot;codex-visualization-lucide&quot;)
-    ?.addEventListener(&quot;load&quot;, initialize, { once: true });
-})();
-&lt;/script&gt;
+  function writeSchemes() { localStorage.setItem(KEY, JSON.stringify(state.schemes)); }
+  function preset() { return Object.assign({}, (window.DATA.pm_preset || {}).weights || {}); }
+  function total() { return Object.keys(state.weights).reduce(function (sum, key) { return sum + Number(state.weights[key] || 0); }, 0); }
+  function filteredPool() {
+    var q = state.query.trim().toLowerCase();
+    return (window.DATA.portfolio_pool || []).filter(function (item) {
+      return !q || [item.ticker, item.name, item.group, item.tag].join(" ").toLowerCase().indexOf(q) >= 0;
+    });
+  }
+  function normalize() {
+    var sum = total();
+    if (!sum) return;
+    var keys = Object.keys(state.weights); var used = 0;
+    keys.forEach(function (key, index) {
+      var value = index === keys.length - 1 ? 100 - used : Math.round(Number(state.weights[key] || 0) / sum * 100);
+      state.weights[key] = value; used += value;
+    });
+  }
+  function backtestHtml() {
+    var monthly = (window.DATA.backtest || {}).monthly || {};
+    var selected = Object.keys(state.weights).filter(function (ticker) { return state.weights[ticker] > 0 && Array.isArray(monthly[ticker]) && monthly[ticker].length > 1; });
+    if (!selected.length) {
+      return '<div class="backtest-empty"><div><b>回测引擎已就绪，当前数据包缺少可审计月末行情</b><span>未使用随机或模拟价格补齐。补充 backtest.monthly 后，将自动剔除缺失标的并计算组合净值、最大回撤、Sharpe 与超额收益。</span></div></div>';
+    }
+    return '<div class="backtest-empty"><div><b>已识别 ' + selected.length + ' 个具有真实月末行情的标的</b><span>当前版本将在数据更新流程中统一计算并绘制相对净值。</span></div></div>';
+  }
+  function schemesHtml() {
+    if (!state.schemes.length) return '<span style="color:var(--muted);font-size:7px">暂无本地方案</span>';
+    return state.schemes.map(function (scheme, index) {
+      return '<button data-scheme="' + index + '">' + APP.escape(scheme.name) + '</button>';
+    }).join("");
+  }
+  function render() {
+    var root = document.getElementById("portfolioPage"); if (!root) return;
+    var sum = total(); var pool = filteredPool();
+    root.innerHTML = '' +
+      '<div class="tab-hero"><div><small>PORTFOLIO LAB · LOCAL STATE</small><h1>组合构建与真实回测</h1><p>按产业链环节搜索候选池、调权、归一化并保存本地方案；回测只接受可审计真实月末价格。</p></div><div class="hero-stat"><span>当前权重</span><b>' + sum + '%</b><small>' + (sum === 100 ? '已归一化' : '需要归一化') + '</small></div></div>' +
+      '<section class="portfolio-layout"><div class="panel pool-panel"><div class="panel-title"><h2>候选池</h2><span>' + pool.length + ' / ' + (window.DATA.portfolio_pool || []).length + ' ASSETS</span></div><input class="pool-search" id="poolSearch" value="' + APP.escape(state.query) + '" placeholder="搜索公司、Ticker、ETF 或产业链环节" /><div class="pool-list">' + pool.map(function (item) {
+        var value = Number(state.weights[item.ticker] || 0);
+        return '<div class="pool-row"><span><b>' + APP.escape(item.ticker) + '</b><small>' + APP.escape(item.name + ' · ' + item.group + ' · ' + item.tag) + '</small></span><input type="range" min="0" max="35" value="' + value + '" data-weight="' + APP.escape(item.ticker) + '" aria-label="' + APP.escape(item.ticker) + ' 权重" /><strong>' + value + '%</strong></div>';
+      }).join('') + '</div></div>' +
+      '<div class="panel"><div class="builder-head"><div><h2>权重与历史回测</h2><p>AS OF ' + APP.escape((window.DATA.backtest || {}).asof || '—') + ' · 缺少数据时不模拟</p></div><div class="builder-actions"><button data-pf="preset">应用 PM 权重</button><button data-pf="clear">清空</button><button data-pf="normalize">归一化</button><button data-pf="save" class="primary">保存方案</button></div></div><div class="panel-title"><div class="weight-total ' + (sum === 100 ? '' : 'warn') + '"><span>组合总权重</span><b>' + sum + '%</b></div><button class="hint" data-note="portfolio_howto">如何使用</button></div><div class="period-tabs">' + ['3M','6M','12M','2Y'].map(function (p) { return '<button data-period="' + p + '" class="' + (state.period === p ? 'active' : '') + '">' + p + '</button>'; }).join('') + '</div>' + backtestHtml() + '<div class="scheme-list"><b style="font-size:7px;margin-right:4px">本地方案</b>' + schemesHtml() + '</div><div class="method-note">' + APP.escape((window.DATA.backtest || {}).note || '') + '</div></div></section>';
+    bind();
+  }
+  function bind() {
+    var search = document.getElementById("poolSearch");
+    search.addEventListener("input", function (event) { state.query = event.target.value; render(); var next = document.getElementById("poolSearch"); next.focus(); next.setSelectionRange(state.query.length, state.query.length); });
+    document.querySelectorAll("[data-weight]").forEach(function (input) { input.addEventListener("input", function (event) { state.weights[event.target.dataset.weight] = Number(event.target.value); render(); }); });
+    document.querySelectorAll("[data-period]").forEach(function (button) { button.addEventListener("click", function () { state.period = button.dataset.period; render(); }); });
+    document.querySelectorAll("[data-pf]").forEach(function (button) { button.addEventListener("click", function () {
+      var action = button.dataset.pf;
+      if (action === "preset") state.weights = preset();
+      if (action === "clear") Object.keys(state.weights).forEach(function (key) { state.weights[key] = 0; });
+      if (action === "normalize") normalize();
+      if (action === "save") {
+        var name = window.prompt("给这个组合方案起个名字", "方案 " + (state.schemes.length + 1));
+        if (!name) return; state.schemes.push({ name: name, weights: Object.assign({}, state.weights), savedAt: new Date().toISOString() }); writeSchemes(); APP.toast("组合方案已保存在本机");
+      }
+      render();
+    }); });
+    document.querySelectorAll("[data-scheme]").forEach(function (button) { button.addEventListener("click", function () { var item = state.schemes[Number(button.dataset.scheme)]; if (item) { state.weights = Object.assign({}, item.weights); render(); APP.toast("已载入本地方案"); } }); });
+  }
+  APP.portfolio = {
+    mount: function () {
+      state.weights = preset(); state.schemes = readSchemes(); render();
+    },
+    render: render
+  };
+}());
 
-&lt;/body&gt;
-&lt;/html&gt;
-"></iframe>
+
+(function () {
+  var APP = window.APP = window.APP || {};
+  var KEY = "aime_alerts_v2";
+  var selected = [];
+  function load() {
+    try {
+      var stored = JSON.parse(localStorage.getItem(KEY) || "null");
+      if (Array.isArray(stored)) return stored;
+    } catch (_) {}
+    return (window.DATA.alert_rules || []).filter(function (rule) { return rule.default; }).map(function (rule) { return rule.id; });
+  }
+  function save() { localStorage.setItem(KEY, JSON.stringify(selected)); }
+  function render() {
+    var root = document.getElementById("alertsPage"); if (!root) return;
+    var rules = window.DATA.alert_rules || []; var feed = window.DATA.alert_feed || [];
+    root.innerHTML = '<div class="tab-hero"><div><small>ALERT CENTER · LOCAL SUBSCRIPTIONS</small><h1>告警订阅与事件时间线</h1><p>只推送真正会改变 AI 主线、投资 ROI、估值性价比或交易动作的信息。</p></div><div class="hero-stat"><span>已订阅</span><b>' + selected.length + ' / ' + rules.length + '</b><small>浏览器本地保存</small></div></div>' +
+      '<section class="alert-layout"><div class="panel"><div class="panel-title"><h2>订阅规则</h2><span>9 RULES · LOCAL STORAGE</span></div>' + rules.map(function (rule, index) {
+        var tone = rule.level || "neutral";
+        return '<div class="alert-rule"><span class="idx">0' + (index + 1) + '</span>' + APP.badge(tone === 'good' ? '利好' : tone === 'bad' ? '风险' : tone === 'rumor' ? '传闻' : '观察', tone) + '<span><b>' + APP.escape(rule.title) + '</b><small>' + APP.escape(rule.desc || '') + '</small></span><label class="switch"><input type="checkbox" data-alert="' + APP.escape(rule.id) + '" ' + (selected.indexOf(rule.id) >= 0 ? 'checked' : '') + ' /><span></span></label></div>';
+      }).join('') + '</div><div class="panel"><div class="panel-title"><h2>通知方式</h2><span>CHANNELS</span></div><div class="channel"><span>◉</span><b>浏览器本地提醒</b>' + APP.badge('可用','good') + '</div><div class="channel"><span>@</span><b>邮件</b>' + APP.badge('预留','neutral') + '</div><div class="channel"><span>✣</span><b>Lark 群</b>' + APP.badge('预留','neutral') + '</div><div class="method-note">邮件与 Lark 未配置凭证，不会发送消息。</div><div class="panel-title"><h2>最新告警时间线</h2><span>FEED</span></div>' + feed.map(function (item) {
+        return '<div class="alert-event"><time>' + APP.escape(item.time) + '</time>' + APP.badge(item.level === 'good' ? '利好' : item.level === 'bad' ? '风险' : '观察',item.level) + '<span><b>' + APP.escape(item.title) + '</b><small>' + APP.escape(item.detail) + ' · ' + APP.escape(item.rule) + '</small></span></div>';
+      }).join('') + '</div></section>';
+    root.querySelectorAll("[data-alert]").forEach(function (input) { input.addEventListener("change", function () {
+      var id = input.dataset.alert;
+      selected = input.checked ? Array.from(new Set(selected.concat(id))) : selected.filter(function (value) { return value !== id; });
+      save(); render(); APP.toast(input.checked ? "已订阅该规则" : "已取消订阅");
+    }); });
+  }
+  APP.alerts = { mount: function () { selected = load(); render(); }, render: render };
+}());
+
+
+(function () {
+  var APP = window.APP = window.APP || {};
+  var KEY = "aime_watchlist_v2";
+  var items = [];
+  function load() { try { var value = JSON.parse(localStorage.getItem(KEY) || "[]"); return Array.isArray(value) ? value : []; } catch (_) { return []; } }
+  function save() { localStorage.setItem(KEY, JSON.stringify(items)); }
+  APP.discovery = {
+    mount: function () { items = load(); },
+    has: function (id) { return items.indexOf(id) >= 0; },
+    toggle: function (id) {
+      items = items.indexOf(id) >= 0 ? items.filter(function (item) { return item !== id; }) : items.concat(id);
+      save();
+      APP.toast(items.indexOf(id) >= 0 ? "已加入 Watchlist" : "已移出 Watchlist");
+      if (APP.renderOverview) APP.renderOverview();
+    },
+    values: function () { return items.slice(); }
+  };
+}());
+
+
+(function () {
+  var APP = window.APP = window.APP || {};
+  var snapshots = ["2026-07-17", "2026-07-11"];
+  APP.snapshots = {
+    mount: function () {
+      var select = document.getElementById("snapshotSelect");
+      var banner = document.getElementById("snapshotBanner");
+      var latest = (window.DATA.meta || {}).period || "最新";
+      select.innerHTML = '<option value="latest">最新 · ' + APP.escape(latest) + '</option>' + snapshots.map(function (date) { return '<option value="' + date + '">快照 · ' + date + '</option>'; }).join('');
+      select.value = window.__SNAPSHOT_DATE__ || "latest";
+      select.addEventListener("change", function () {
+        if (select.value === "latest") location.href = location.pathname;
+        else location.href = location.pathname + "?snapshot=" + encodeURIComponent(select.value);
+      });
+      if (window.__SNAPSHOT_DATE__) {
+        banner.classList.remove("hidden");
+        banner.innerHTML = '<b>历史冻结快照 · ' + APP.escape(window.__SNAPSHOT_DATE__) + '</b><span>这是当日冻结数据，不是实时数据流；旧快照缺失字段保持为空，不补写历史数字。</span><button id="backLatest">返回最新</button>';
+        document.getElementById("backLatest").addEventListener("click", function () { location.href = location.pathname; });
+      } else if (window.__INVALID_SNAPSHOT__) {
+        banner.classList.remove("hidden");
+        banner.innerHTML = '<b>未找到快照 · ' + APP.escape(window.__INVALID_SNAPSHOT__) + '</b><span>已安全回退到最新数据，页面不会白屏。</span>';
+      }
+    }
+  };
+}());
+
+
+(function () {
+  var APP = window.APP = window.APP || {};
+  var KEY = "whatsnew:lastReadDate";
+  APP.whatsnew = {
+    mount: function () {
+      var button = document.getElementById("whatsnewBtn");
+      var badge = document.getElementById("whatsnewBadge");
+      var data = window.DATA.whats_new;
+      if (!data) { button.classList.add("hidden"); return; }
+      var last = localStorage.getItem(KEY) || "";
+      var unread = data.date > last;
+      badge.textContent = unread ? String((data.items || []).length) : "0";
+      badge.classList.toggle("hidden", !unread);
+      button.classList.toggle("unread", unread);
+      button.addEventListener("click", function () {
+        localStorage.setItem(KEY, data.date);
+        badge.classList.add("hidden"); button.classList.remove("unread");
+        APP.drawer.open({
+          eyebrow: "WHAT'S NEW · " + data.date,
+          title: "今日更新",
+          html: '<p>生成时间：' + APP.escape(data.generated_at || "—") + '</p><div class="logic-box">' + (data.items || []).map(function (item) { return '<b>' + APP.escape(item.tag) + '</b><span>' + APP.escape(item.text) + '</span>'; }).join('') + '</div>'
+        });
+      });
+    }
+  };
+}());
+
+
+(function () {
+  var APP = window.APP = window.APP || {};
+  var D = window.DATA = window.DATA || window.__DASHBOARD_DATA__ || {};
+  var state = { tab: "overview", signalFilter: "全部", periodFilter: "全部", logicMode: "upstream_flow", firstPaint: true };
+  var observer = null;
+  var SOURCE_URLS = {
+    "NVIDIA IR": "https://investor.nvidia.com/",
+    "Microsoft IR": "https://www.microsoft.com/en-us/Investor",
+    "Amazon IR": "https://ir.aboutamazon.com/",
+    "Alphabet IR": "https://abc.xyz/investor/",
+    "Oracle IR": "https://investor.oracle.com/",
+    "TSMC IR": "https://investor.tsmc.com/",
+    "ASML IR": "https://www.asml.com/en/investors",
+    "Micron IR": "https://investors.micron.com/",
+    "Broadcom IR": "https://investors.broadcom.com/",
+    "Qualcomm IR": "https://investor.qualcomm.com/",
+    "SEC": "https://www.sec.gov/divisions/investment/13ffaq",
+    "FRED": "https://fred.stlouisfed.org/",
+    "TrendForce": "https://www.trendforce.com/",
+    "Reuters": "https://www.reuters.com/"
+  };
+  var MODULES = [
+    ["总览", [["01","需求端核心信号"],["02","云厂 Capex 三年趋势"],["03","信号仪表盘"]]],
+    ["产业链分析", [["04","上游算力五链条"],["05","产业链逻辑 · 两种看法"]]],
+    ["基本面与标的", [["06","财报核心信号 · 7 指标"],["07","重点公司 · 环节龙头"],["08","重点 ETF 行情"],["09","估值雷达 · Valuation"]]],
+    ["需求前瞻", [["10","景气前瞻信号"],["11","竞争风险与敞口"],["12","产业扩散 · 交付验证"],["13","配置结论 · 推荐布局"]]],
+    ["行业落地", [["14","行业落地热力"]]],
+    ["风险敞口", [["15","风险敞口 Watch"],["16","要点新闻汇总 · 传闻验证"]]],
+    ["前瞻与展望", [["17","主线动态 · Signal Feed"],["18","主线动态 · 关键事件时间线"],["19","主线动态 · 下期重点关注"],["20","非主线关注 · Discovery Radar"],["21","资金动向 · 头部基金 13F"]]]
+  ];
+
+  function a(value) { return Array.isArray(value) ? value : []; }
+  function o(value) { return value && typeof value === "object" ? value : {}; }
+  function esc(value) { return APP.escape(value); }
+  function tone(value) {
+    if (value === "利好" || value === "确认" || value === "good") return "good";
+    if (value === "利空" || value === "风险" || value === "bad") return "bad";
+    if (value === "传闻" || value === "rumor") return "rumor";
+    if (value === "观察" || value === "observe") return "observe";
+    return "neutral";
+  }
+  function badge(value, forced) { return APP.badge(value, forced || tone(value)); }
+  function source(label, credibility) {
+    var url = SOURCE_URLS[label];
+    var cred = APP.credibility(credibility || (url ? "权威" : "较可信"));
+    return cred + (url ? ' <a class="source" target="_blank" rel="noopener" href="' + esc(url) + '">' + esc(label) + ' ↗</a>' : ' <span class="source">' + esc(label || "来源待补") + '</span>');
+  }
+  function card(id, title, meta, body, extra) {
+    return '<section class="module card ' + (extra || "") + '" id="m' + id + '"><header class="card-head"><h2>' + esc(title) + '</h2><div class="meta">' + (meta || "") + '</div></header>' + body + '</section>';
+  }
+  function empty(text) { return '<div class="backtest-empty" style="min-height:120px"><div><b>该历史快照未包含此模块</b><span>' + esc(text || "按快照兼容规则保留空壳，不补写历史数字。") + '</span></div></div>'; }
+  function spark(values, color) {
+    values = a(values); if (values.length < 2) return "";
+    var min = Math.min.apply(Math, values), max = Math.max.apply(Math, values), range = max - min || 1;
+    var pts = values.map(function (value, index) { return (index / (values.length - 1) * 100).toFixed(1) + "," + (28 - ((value - min) / range) * 23).toFixed(1); }).join(" ");
+    return '<svg class="spark" viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true"><polyline points="' + pts + '" fill="none" stroke="' + (color || "var(--green)") + '" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
+  }
+  function trend(actual, estimate) {
+    actual = a(actual); estimate = a(estimate); var all = actual.concat(estimate); if (all.length < 2) return "";
+    var min = Math.min.apply(Math, all), max = Math.max.apply(Math, all), range = max - min || 1;
+    function points(values, offset) { return values.map(function (value, index) { return (((index + offset) / (all.length - 1)) * 100).toFixed(1) + "," + (23 - ((value - min) / range) * 19).toFixed(1); }).join(" "); }
+    var actualPoints = points(actual, 0);
+    var estValues = estimate.length && actual.length ? [actual[actual.length - 1]].concat(estimate) : estimate;
+    var estPoints = points(estValues, Math.max(0, actual.length - 1));
+    return '<svg viewBox="0 0 100 25" preserveAspectRatio="none"><polyline points="' + actualPoints + '" fill="none" stroke="var(--green)" stroke-width="2" vector-effect="non-scaling-stroke"/>' + (estimate.length ? '<polyline points="' + estPoints + '" fill="none" stroke="var(--blue)" stroke-width="2" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/><circle cx="98" cy="' + estPoints.split(" ").slice(-1)[0].split(",")[1] + '" r="2.2" fill="var(--panel)" stroke="var(--blue)" vector-effect="non-scaling-stroke"/>' : "") + '</svg>';
+  }
+  function findCompany(ticker) { return o(D.companies)[ticker] || null; }
+  function companyDrawer(ticker) {
+    var item = findCompany(ticker);
+    if (!item) return { eyebrow: "COMPANY · " + ticker, title: ticker, html: '<p>当前冻结数据包未包含该公司的估值明细。</p>' };
+    var peg = item.peg == null ? "周期口径" : String(item.peg);
+    return {
+      eyebrow: "COMPANY · " + ticker + " · " + (item.market || ""),
+      title: (item.cn || item.name) + " 投资卡",
+      html: '<div class="drawer-kpis"><div class="drawer-kpi"><small>当前价</small><b>' + esc(item.cur) + '</b></div><div class="drawer-kpi"><small>Forward PE</small><b>' + esc(item.pe) + 'x</b></div><div class="drawer-kpi"><small>PEG / 口径</small><b>' + esc(peg) + '</b></div></div><h3>PM 结论</h3><p>' + esc(item.logic) + '。估值判断：' + esc(item.est) + '；20 日位置：' + esc(item.d20) + '%。</p><div class="logic-box"><b>需求</b><span>必须验证订单、云增速或数据中心收入</span><b>供给</b><span>判断产能、封装、存储或客户锁定带来的议价权</span><b>估值</b><span>PE、PEG、增长确定性与 20 日回撤共同判断</span><b>财报窗口</b><span>' + esc(item.earn || "—") + '</span></div><h3>估值纪律</h3><p>PEG 仅适用于增长相对稳定的公司；MU 等周期股应结合 HBM 供需、毛利率、库存与价格周期。</p><div class="drawer-actions">' + source(item.source || "公司 IR", "权威") + '</div>'
+    };
+  }
+  function signalDrawer(id) {
+    var item = a(D.signals).filter(function (signal) { return signal.id === id; })[0];
+    if (!item) return null;
+    return { eyebrow: "SIGNAL · " + item.date, title: item.claim, html: '<div class="drawer-actions">' + badge(item.impact) + badge(item.signal || "信号", tone(item.signal)) + badge(item.impact_tier, "observe") + '</div><h3>投资含义</h3><p>' + esc(item.rationale) + '</p><div class="logic-box"><b>行业 / 链条</b><span>' + esc((item.sector || "—") + " / " + (item.chain || "—")) + '</span><b>相关标的</b><span>' + esc(a(item.companies).join(" · ") || "—") + '</span><b>可信度</b><span>' + source(item.source, item.credibility || item.confidence) + '</span><b>影响力</b><span>' + esc(item.impact_tier) + '</span></div><h3>判断闸门</h3><p>只有同时验证需求、供给与估值三项，才可升级为强利好；高等级负面仍是高权重利空。</p>' };
+  }
+  function chainDrawer(id) {
+    var item = a(D.chains).filter(function (chain) { return chain.id === id; })[0];
+    if (!item) return null;
+    return { eyebrow: "CHAIN · " + item.id, title: item.name, html: '<div class="drawer-kpis"><div class="drawer-kpi"><small>链条评分</small><b>' + esc(item.score) + '</b></div><div class="drawer-kpi"><small>当前判断</small><b>' + esc(item.verdict) + '</b></div><div class="drawer-kpi"><small>核心标签</small><b style="font-size:10px">' + esc(item.highlight) + '</b></div></div><h3>验证证据</h3><p>' + esc(item.evidence) + '</p><div class="logic-box"><b>公司</b><span>' + esc(a(item.companies).join(" · ")) + '</span><b>ETF</b><span>' + esc(a(item.etfs).join(" · ") || "—") + '</span><b>生命周期</b><span>加速期 → 成熟期，需跟踪交付和盈利兑现</span></div><h3>生命周期 S 曲线</h3><p>蓄能探索期 → 加速期 → 成熟期 → 衰退期。当前评分不能替代对估值与交易位置的判断。</p>' };
+  }
+  function industryDrawer(key) {
+    var item = a(D.industries).filter(function (industry) { return industry.key === key; })[0]; if (!item) return null;
+    var cases = a(o(D.industry_cases)[key]);
+    return { eyebrow: "INDUSTRY ROI · " + key, title: item.name, html: '<div class="drawer-kpis"><div class="drawer-kpi"><small>成熟度</small><b>' + item.maturity + '</b></div><div class="drawer-kpi"><small>ROI</small><b>' + item.roi + '</b></div><div class="drawer-kpi"><small>商业化</small><b>' + item.commercialization + '</b></div></div><h3>TAM 统一口径</h3><p>AI 空间 = 行业整体规模 ' + esc(item.tam) + ' 亿美元 × AI 渗透率 ' + esc(Math.round(item.penetration * 100)) + '% = ' + esc(item.ai_tam) + ' 亿美元。</p><div class="logic-box"><b>来源</b><span>' + esc(item.source) + '</span><b>案例数</b><span>' + esc(item.cases) + '</span>' + cases.map(function (x) { return '<b>' + esc(x.name) + '</b><span>' + esc(x.scene + " · " + x.stage + " · " + x.roi) + '</span>'; }).join("") + '</div>' };
+  }
+  function fundDrawer(index) {
+    var item = a(o(D.holdings_13f).funds)[index]; if (!item) return null;
+    return { eyebrow: "13F FUND · LAGGED DATA", title: item.name, html: '<div class="drawer-kpis"><div class="drawer-kpi"><small>资金信号</small><b>' + item.score + '</b></div><div class="drawer-kpi"><small>变动</small><b>' + esc(item.move) + '</b></div></div><h3>重点方向</h3><p>' + esc(item.focus) + '</p><h3>摘要</h3><p>' + esc(item.note) + '</p><div class="logic-box"><b>口径</b><span>13F 报告的是季末持仓，不代表当前实时交易。</span><b>核验</b><span><a class="source" href="' + SOURCE_URLS.SEC + '" target="_blank" rel="noopener">SEC 13F 官方说明 ↗</a></span></div>' };
+  }
+  function riskDrawer(ticker) {
+    var item = a(D.risk_exposure).filter(function (risk) { return risk.ticker === ticker; })[0]; if (!item) return null;
+    return { eyebrow: "RISK EXPOSURE · " + ticker, title: item.company, html: '<div class="drawer-kpis"><div class="drawer-kpi"><small>对华收入占比</small><b>' + item.cn_rev_pct + '%</b></div><div class="drawer-kpi"><small>风险等级</small><b>' + esc(item.level) + '</b></div><div class="drawer-kpi"><small>趋势</small><b>' + esc(item.trend) + '</b></div></div><h3>风险判断</h3><p>' + esc(item.assess) + '</p><div class="logic-box"><b>风险类型</b><span>' + esc(item.risk_type) + '</span><b>公开来源</b><span>' + esc(item.source) + '</span></div>' };
+  }
+  function discoveryDrawer(id) {
+    var item = a(D.discovery).filter(function (x) { return x.id === id; })[0]; if (!item) return null;
+    return { eyebrow: "DISCOVERY · " + item.chain_label, title: item.name, html: '<div class="drawer-kpis"><div class="drawer-kpi"><small>确定性评分</small><b>' + item.certainty_score + '</b></div><div class="drawer-kpi"><small>AI 空间</small><b>' + esc(item.tam) + '</b></div><div class="drawer-kpi"><small>盈利确定性</small><b style="font-size:11px">' + esc(item.profit_certainty) + '</b></div></div><h3>为什么关注</h3><p>' + esc(item.why) + '</p><div class="logic-box"><b>驱动</b><span>' + esc(item.driver) + '</span><b>瓶颈</b><span>' + esc(item.bottleneck) + '</span><b>主线关系</b><span>' + esc(item.mainline_relation) + '</span><b>公司 / ETF</b><span>' + esc(a(item.companies).concat(a(item.etfs)).join(" · ")) + '</span></div>' };
+  }
+
+  function renderToc() {
+    var html = '<div class="toc-head"><strong>模块导航</strong><span>PM MODULES</span></div>';
+    MODULES.forEach(function (group) {
+      html += '<div class="toc-group">' + esc(group[0]) + '</div>' + group[1].map(function (item) { return '<a href="#m' + item[0] + '" data-toc="m' + item[0] + '"><span>' + item[0] + '</span>' + esc(item[1]) + '</a>'; }).join("");
+    });
+    document.getElementById("toc").innerHTML = html;
+  }
+  function kpiModule() {
+    var k = o(D.kpi); var total = Number(k.good || 0) + Number(k.neutral || 0) + Number(k.rumor || 0) + Number(k.bad || 0) + Number(k.observe || 0);
+    var buttons = [
+      ["利好", k.good || 0, "good", a(o(k.spark).good), "var(--green)"],
+      ["中性", k.neutral || 0, "neutral", a(o(k.spark).neutral), "var(--blue)"],
+      ["传闻/观察", Number(k.rumor || 0) + Number(k.observe || 0), "rumor", a(o(k.spark).rumor), "var(--orange)"],
+      ["确认利空", k.bad || 0, "bad", a(o(k.spark).bad), "var(--red)"]
+    ];
+    var body = '<div class="kpi-shell"><div class="filters">' + ["全部","利好","利空","传闻","中性","观察"].map(function (name) { return '<button data-signal-filter="' + name + '" class="' + (state.signalFilter === name ? "active" : "") + '">' + name + '</button>'; }).join("") + '</div><div class="kpi-grid">' + buttons.map(function (item) { return '<button class="kpi ' + item[2] + '" data-signal-filter="' + (item[0] === "传闻/观察" ? "观察" : item[0].replace("确认","")) + '"><small>' + item[0] + '</small><strong>' + item[1] + '</strong>' + spark(item[3], item[4]) + '</button>'; }).join("") + '</div><button class="net-band" data-note="weighting"><span><small>利好 VS 利空 · 多空综合评分</small><strong>利好信号显著多于利空</strong></span><b>净多 ' + esc(k.net_position == null ? "—" : k.net_position) + ' · ▲ ' + esc(Number(k.net_position || 0) - Number(k.net_position_prev || 0)) + '</b></button></div>';
+    var donut = '<div class="donut-area"><button class="donut" data-signal-filter="全部" aria-label="查看全部信号"><span><b>' + total + '</b><small>ALL SIGNALS</small></span></button><div class="legend"><p><i></i><span>高可信利好</span><b>' + (k.good || 0) + '</b></p><p><i class="n"></i><span>中性</span><b>' + (k.neutral || 0) + '</b></p><p><i class="o"></i><span>传闻 / 观察</span><b>' + (Number(k.rumor || 0) + Number(k.observe || 0)) + '</b></p><p><i class="r"></i><span>确认利空</span><b>' + (k.bad || 0) + '</b></p></div></div>';
+    return '<div class="grid split-65">' + card("03","信号仪表盘 · 利好 / 利空分布",'<span>evidence.md · 动态 TODAY</span><button class="hint" data-note="impact_tier">影响力口径</button>',body) + '<section class="card"><header class="card-head"><h2>5 桶分布</h2><div class="meta">CLICK TO FILTER</div></header>' + donut + '</section></div>';
+  }
+  function demandModule() {
+    var cards = a(o(D.demand_core).cards); if (!cards.length) return card("01","需求端核心信号","",empty());
+    return card("01","需求端核心信号",'<span>AS OF ' + esc(o(D.demand_core).asof) + '</span><button class="hint" data-note="weighting">判断闸门</button>','<p class="card-intro">' + esc(o(D.demand_core).intro) + '</p><div class="demand-grid">' + cards.map(function (item) { return '<button data-open-demand="' + esc(item.key) + '"><small>' + esc(item.label) + '</small><strong>' + esc(item.value) + '</strong><span>' + esc(item.value_sub) + '</span><em>' + esc(item.delta) + '</em>' + spark(item.trend, item.dir === "observe" ? "var(--orange)" : "var(--green)") + '</button>'; }).join("") + '</div>');
+  }
+  function capexModule() {
+    var c = o(D.capex); if (!a(c.firms).length) return card("02","Big5 云厂 Capex 三年趋势","",empty());
+    var max = Math.max.apply(Math, a(c.y2026e));
+    var rows = a(c.firms).map(function (name, i) {
+      return '<div class="capex-row"><label>' + esc(name) + '</label><div class="capex-bars"><i style="width:' + (Number(c.y2024[i] || 0) / max * 100) + '%" title="2024 实绩"></i><i style="width:' + (Number(c.y2025[i] || 0) / max * 100) + '%" title="2025 实绩"></i><i class="est" style="width:' + (Number(c.y2026e[i] || 0) / max * 100) + '%" title="2026E 指引/预期"></i></div><b>' + esc(c.y2026e[i]) + 'E</b></div>';
+    }).join("");
+    return card("02","Big5 云厂 Capex 三年趋势",'<span>USD BN</span><button class="hint" data-note="weighting">实绩 / 预期</button>','<div class="capex-wrap"><div>' + rows + '<div class="legend-line"><i></i> 实绩 2024/2025　<i class="est"></i> 指引/预期 2026E</div></div><div class="capex-total"><small>BIG5 · 2026E</small><strong>$' + esc(a(c.total).slice(-1)[0] || "—") + 'B</strong><span>+' + esc(a(c.total_yoy).slice(-1)[0] || "—") + '% YoY E</span><div class="legend-line">' + esc(c.caliber_note) + '</div></div></div>');
+  }
+  function chainsModule() {
+    var chains = a(D.chains); if (!chains.length) return card("04","上游算力五链条","",empty());
+    return card("04","上游算力五链条 · 信号强度",'<span>DEMAND → SUPPLY → PRICING</span>','<p class="card-intro">已根据需求、供给与盈利兑现判断当前强度；点击查看链条详情。</p><div class="chain-strip">' + chains.map(function (item) { return '<button class="chain-item" data-open-chain="' + esc(item.id) + '"><header><small>' + esc(item.name) + '</small>' + badge(item.verdict) + '</header><strong>' + item.score + '<small>/100</small></strong><p>' + esc(item.evidence) + '</p><div class="meter"><i style="width:' + item.score + '%"></i></div></button>'; }).join("") + '</div>');
+  }
+  function logicModule() {
+    var nodes = a(o(D.chain_logic)[state.logicMode]); if (!nodes.length) return card("05","AI 产业链逻辑 · 两种看法","",empty());
+    var upstream = a(o(D.chain_logic).upstream_flow);
+    var priority = a(o(D.chain_logic).profit_priority);
+    var left = upstream.map(function (item, index) { return '<button class="logic-node" data-open-chain="' + esc(item.id) + '"><header><b>0' + (index + 1) + ' · ' + esc(item.name) + '</b>' + badge(item.verdict) + '</header><p>' + esc(item.desc) + '</p><footer>' + esc(a(item.companies).join(" · ")) + '</footer></button>'; }).join("");
+    var right = priority.map(function (item, index) { return '<button class="priority-node" data-open-priority="' + esc(item.id) + '"><span>' + (index + 1) + '</span><div><b>' + esc(item.name) + '</b><small>' + esc(item.verdict) + '</small></div><em>' + item.score + '</em><div class="bar"><i style="width:' + item.score + '%"></i></div></button>'; }).join("");
+    return card("05","AI 产业链逻辑 · 两种看法",'<button class="hint" data-note="key_companies">配置口径</button>','<div class="logic-wrap"><div class="logic-tabs"><button data-logic="upstream_flow" class="' + (state.logicMode === "upstream_flow" ? "active" : "") + '">按上下游资金流向</button><button data-logic="profit_priority" class="' + (state.logicMode === "profit_priority" ? "active" : "") + '">按盈利确定性 / 卡脖子程度</button></div><div class="logic-columns"><div class="logic-list">' + left + '</div><div class="logic-list">' + right + '</div></div></div>');
+  }
+  function earningsModule() {
+    var rows = a(D.earnings_trends); if (!rows.length) return card("06","财报核心信号 · 7 指标","",empty());
+    return card("06","财报核心信号 · 7 指标",'<span>实绩 —　预期 -- ○E</span><button class="hint" data-note="earnings_priority">排序口径</button>','<div class="earnings-list">' + rows.sort(function (x,y) { return x.impact_rank - y.impact_rank; }).map(function (item,index) { return '<div class="earning-row" data-open-earning="' + index + '"><span>0' + (index + 1) + '</span><div><b>' + esc(item.metric) + '</b><small class="cred">' + esc(item.source) + '</small></div><div class="trend-line">' + trend(item.actual,item.estimate) + '</div><em>' + item.value + '</em></div>'; }).join("") + '</div>');
+  }
+  function companiesModule() {
+    var keys = Object.keys(o(D.companies)); if (!keys.length) return card("07","重点公司 · 环节龙头","",empty());
+    var rows = keys.map(function (ticker) { var item = D.companies[ticker]; return '<tr data-open-company="' + ticker + '"><td>' + ticker + '</td><td>' + esc(item.cn) + '</td><td>' + esc(item.cur) + '</td><td>' + esc(item.pe) + 'x</td><td>' + esc(item.peg == null ? "周期" : item.peg) + '</td><td>' + esc(item.d20) + '%</td><td>' + badge(item.est, item.est.indexOf("贵") >= 0 ? "observe" : "good") + '</td><td>' + source(item.source,"权威") + '</td></tr>'; }).join("");
+    return card("07","重点公司 · 环节龙头",'<button class="hint" data-note="key_companies">入选口径</button>','<div style="overflow:auto"><table class="company-table"><thead><tr><th>Ticker</th><th>公司</th><th>价格</th><th>PE</th><th>PEG</th><th>20D</th><th>估值判断</th><th>来源</th></tr></thead><tbody>' + rows + '</tbody></table></div>');
+  }
+  function etfModule() {
+    var rows = a(D.etf_focus); if (!rows.length) return card("08","重点 ETF","",empty());
+    return card("08","重点 ETF 行情与配置角色",'<button class="hint" data-note="backtest">回测口径</button>','<div class="etf-list">' + rows.map(function (item) { return '<div class="list-row" data-open-etf="' + esc(item.ticker) + '"><b>' + esc(item.ticker) + '</b><span><strong>' + esc(item.name) + '</strong><small>' + esc(item.role) + '</small></span><em>' + esc(item.verdict) + '</em></div>'; }).join("") + '</div>');
+  }
+  function valuationModule() {
+    var keys = Object.keys(o(D.companies)); if (!keys.length) return card("09","估值雷达 · Valuation","",empty());
+    return card("09","估值雷达 · PE / PEG / 回撤",'<button class="hint" data-note="key_companies">合理 PE 公式</button>','<div class="allocation-list">' + keys.map(function (ticker) { var item = D.companies[ticker]; var peg = item.peg == null ? "周期口径" : item.peg < 1 ? "成长未充分定价" : item.peg <= 1.5 ? "合理" : item.peg <= 2 ? "偏贵可被确定性支撑" : "估值透支风险"; return '<div class="list-row" data-open-company="' + ticker + '"><b>' + ticker + '</b><span><strong>PE ' + esc(item.pe) + 'x · PEG ' + esc(item.peg == null ? "—" : item.peg) + '</strong><small>' + esc(peg) + ' · 20D ' + esc(item.d20) + '%</small></span>' + badge(item.est,item.est.indexOf("贵")>=0?"observe":"good") + '</div>'; }).join("") + '</div><div class="method-note">合理 PE = 基础 PE × 增长质量 × 供给紧张 × 竞争格局 × 估值情绪折扣。</div>');
+  }
+  function demandForwardModule() {
+    return card("10","需求前瞻信号 · Demand Signals",'<span>FIVE-LAYER CHECK</span>','<div class="logic-box" style="margin:8px 10px 10px"><b>需求超预期</b><span>Capex、云收入、订单与 GPU 容量仍强</span><b>供给紧张</b><span>先进封装、HBM、1.6T 与电力仍有约束</span><b>估值未透支</b><span>板块回撤改善性价比，但 NVDA 等仍需纪律</span><b>当前 PM 结论</b><span style="color:var(--green)">主线仍成立；交易从追涨切换到回撤确认</span></div>');
+  }
+  function riskModule(id, title) {
+    var rows = a(D.risk_exposure); if (!rows.length) return card(id,title,"",empty());
+    return card(id,title,'<span>按对华收入占比排序</span>','<div style="overflow:auto"><table class="risk-table"><thead><tr><th>公司</th><th>Ticker</th><th>环节</th><th>对华收入</th><th>风险类型</th><th>等级</th><th>评估</th></tr></thead><tbody>' + rows.slice().sort(function(x,y){return y.cn_rev_pct-x.cn_rev_pct;}).map(function(item){return '<tr data-open-risk="' + item.ticker + '"><td>' + esc(item.company) + '</td><td>' + esc(item.ticker) + '</td><td>' + esc(item.sector) + '</td><td>' + item.cn_rev_pct + '%</td><td>' + esc(item.risk_type) + '</td><td>' + badge(item.level,item.level==="高"?"bad":"observe") + '</td><td>' + esc(item.assess) + '</td></tr>';}).join("") + '</tbody></table></div>');
+  }
+  function deliveryModule() {
+    var item = o(D.delivery_validation); var rows = a(item.signals); if (!rows.length) return card("12","产业扩散 · 数据中心交付验证","",empty());
+    return card("12","产业扩散 · 数据中心基础设施交付验证",'<span>TRIGGER ≥ ' + esc(item.threshold) + '/4</span>','<p class="card-intro">验证 Capex 是否从规划投入转化为真实可用资产；当前不把未触发信号写成利好。</p><div class="delivery-grid">' + rows.map(function(x,index){return '<div class="delivery-item"><header><b>0' + (index+1) + ' · ' + esc(x.name) + '</b>' + badge(x.status,"observe") + '</header><p>触发条件：' + esc(x.trigger) + '</p><footer><span>' + esc(x.source) + '</span><span>监测中</span></footer></div>';}).join("") + '</div><div class="delivery-status"><span><b>' + esc(item.status_text) + '</b> · ' + esc(item.alert_desc) + '</span>' + badge("STANDBY","observe") + '</div>');
+  }
+  function allocationModule() {
+    var rows = a(D.recommendations); if (!rows.length) return card("13","配置结论 · 推荐布局","",empty());
+    return card("13","配置结论 · 推荐布局",'<span>PM ACTION MAP</span>','<div class="allocation-list">' + rows.map(function(item){return '<div class="list-row"><b>' + esc(item.label) + '</b><span><strong>' + esc(item.names) + '</strong><small>' + esc(item.reason) + '</small></span><em>' + esc(item.action) + '</em></div>';}).join("") + '</div>');
+  }
+  function industryModule() {
+    var rows = a(D.industries); if (!rows.length) return card("14","行业落地 ROI 热力矩阵","",empty());
+    var html = '<div class="industry-wrap"><div class="heatmap"><header>行业</header><header>成熟度</header><header>ROI</header><header>商业化</header><header>AI 空间</header>' + rows.map(function(item){return '<button data-open-industry="' + esc(item.key) + '">' + esc(item.name) + '</button><button class="score" style="--v:' + item.maturity + '" data-open-industry="' + esc(item.key) + '">' + item.maturity + '</button><button class="score" style="--v:' + item.roi + '" data-open-industry="' + esc(item.key) + '">' + item.roi + '</button><button class="score" style="--v:' + item.commercialization + '" data-open-industry="' + esc(item.key) + '">' + item.commercialization + '</button><button class="tam" data-open-industry="' + esc(item.key) + '">$' + item.ai_tam + 'B</button>';}).join("") + '</div></div>';
+    return card("14","行业落地 ROI 热力矩阵 · 11 行业 × 3 维度",'<button class="hint" data-note="industry">行业口径</button><button class="hint" data-note="industry_tam_method">TAM 公式</button>',html);
+  }
+  function rumorModule() {
+    var rows = a(D.rumors); if (!rows.length) return card("16","要点新闻汇总 · 传闻验证象限","",empty());
+    return card("16","要点新闻汇总 · 待验证风险 / 催化剂",'<button class="hint" data-note="rumor">象限口径</button>','<div class="rumor-map"><span class="axis-x">与官方 / 产业逻辑吻合度 →</span><span class="axis-y">风险敞口 →</span>' + rows.map(function(item){var size=38+Math.round(item.freq*.25);return '<button class="bubble ' + (item.impact==="利空"?"bad":"") + '" data-open-rumor="' + item.id + '" style="left:' + item.logicFit + '%;top:' + (100-item.risk) + '%;width:' + size + 'px;height:' + size + 'px">' + esc(item.companies.join("/")) + '</button>';}).join("") + '</div>');
+  }
+  function filteredSignals() {
+    var rows = a(D.signals).slice(); var today = new Date(o(D.meta).period || o(D.meta).generated_at || Date.now());
+    if (state.signalFilter !== "全部") rows = rows.filter(function(item){ if(state.signalFilter==="传闻") return item.signal==="传闻"; if(state.signalFilter==="观察") return item.impact==="观察" || item.signal==="观察"; return item.impact===state.signalFilter; });
+    if (state.periodFilter !== "全部") { var days = Number(state.periodFilter); var cutoff = new Date(today.getTime() - days*86400000); rows = rows.filter(function(item){ var date=new Date(item.date); return item.future || date>=cutoff || date>today; }); }
+    return rows;
+  }
+  function signalFeedModule() {
+    var rows = filteredSignals();
+    var head = '<div class="filter-bar"><div>' + ["全部","利好","利空","传闻","中性","观察"].map(function(name){return '<button data-signal-filter="' + name + '" class="' + (state.signalFilter===name?"active":"") + '">' + name + '</button>';}).join("") + '</div><div>' + [["3","近3天"],["7","近7天"],["30","近30天"],["全部","全部"]].map(function(item){return '<button data-period-filter="' + item[0] + '" class="' + (state.periodFilter===item[0]?"active":"") + '">' + item[1] + '</button>';}).join("") + '</div></div>';
+    var body = rows.length ? rows.map(function(item){return '<div class="signal-row" data-open-signal="' + item.id + '"><time>' + esc(item.date.slice(5)) + '</time><span>' + badge(item.impact) + '</span><span><b>' + esc(item.claim) + '</b><small>' + esc(item.rationale) + '</small></span><span class="tier">' + esc(item.impact_tier) + '</span>' + source(item.source,item.credibility||item.confidence) + '</div>';}).join("") : empty("当前筛选没有匹配信号。");
+    return card("17","主线动态 · Signal Feed",'<span>' + rows.length + ' / ' + a(D.signals).length + ' SIGNALS</span>',head+body);
+  }
+  function timelineModule() {
+    var rows=a(D.timeline); if(!rows.length) return card("18","关键事件时间线","",empty());
+    return card("18","主线动态 · 关键事件时间线",'<button class="hint" data-note="timeline">实心 / 空心</button>','<div class="timeline">' + rows.map(function(item){return '<div class="timeline-item ' + (item.future?"future":"") + '"><time>' + esc(item.date) + '</time><b>' + esc(item.title) + '</b><small>' + esc(item.kind) + (item.future?" · 未来节点":" · 已发生") + '</small></div>';}).join("") + '</div>');
+  }
+  function nextWatchModule() {
+    var rows=a(D.next_watch); if(!rows.length) return card("19","下期重点关注","",empty());
+    return card("19","主线动态 · 下期重点关注",'<span>NEXT CHECKPOINTS</span>','<div class="watch-list">' + rows.map(function(item,index){return '<div class="list-row"><b>0' + (index+1) + '</b><span><strong>' + esc(item) + '</strong><small>触发后更新 Signal Feed、交易动作与告警</small></span>' + badge("待跟踪","observe") + '</div>';}).join("") + '</div>');
+  }
+  function discoveryModule() {
+    var rows=a(D.discovery).slice().sort(function(x,y){return y.certainty_score-x.certainty_score;}); if(!rows.length) return card("20","Discovery Radar","",empty());
+    return card("20","非主线但值得关注 · Discovery Radar",'<span>' + esc(o(D.meta).crawl_sources||0) + ' SOURCES · ' + a(D.discovery_feed).length + ' FEED</span><button class="hint" data-note="discovery_feed">更新口径</button>','<div class="discovery-grid">' + rows.map(function(item){var on=APP.discovery.has(item.id);return '<div class="discovery-card" data-open-discovery="' + item.id + '"><header><span>' + badge(item.chain_label,"neutral") + '</span><button class="watch-btn ' + (on?"on":"") + '" data-watch="' + item.id + '">' + (on?"✓ WATCHING":"+ WATCH") + '</button></header><h3>' + esc(item.name) + ' · ' + item.certainty_score + '</h3><p>' + esc(item.why) + '</p><footer><span>' + esc(item.companies.join(" · ")) + '</span><span>' + esc(item.tam) + '</span></footer></div>';}).join("") + '</div>');
+  }
+  function fundsPreviewModule() {
+    var funds=a(o(D.holdings_13f).funds); if(!funds.length) return card("21","头部基金 13F","",empty());
+    return card("21","资金动向 · 头部基金 13F",'<span>披露滞后 · 非实时交易</span>','<div class="fund-cards" style="padding:8px 10px 10px;margin:0">' + funds.map(function(item,index){return '<button class="fund-card" data-open-fund="' + index + '"><header><span>0' + (index+1) + '</span>' + badge(item.move,item.move==="增持"?"good":item.move==="减持"?"bad":"neutral") + '</header><h3>' + esc(item.name) + '</h3><b>' + esc(item.focus) + '</b><p>' + esc(item.note) + '</p><footer><span>信号评分</span><em>' + item.score + '</em></footer></button>';}).join("") + '</div>');
+  }
+
+  APP.renderOverview = function (preserve) {
+    var y = preserve ? window.scrollY : 0;
+    renderToc();
+    document.getElementById("overviewMain").innerHTML =
+      demandModule() + capexModule() + kpiModule() + chainsModule() + logicModule() + earningsModule() +
+      companiesModule() + etfModule() + valuationModule() + demandForwardModule() + riskModule("11","竞争风险与对华敞口") +
+      deliveryModule() + allocationModule() + industryModule() + riskModule("15","风险敞口 Watch") + rumorModule() +
+      signalFeedModule() + timelineModule() + nextWatchModule() + discoveryModule() + fundsPreviewModule();
+    bindOverview();
+    observeToc();
+    if (preserve) requestAnimationFrame(function(){ window.scrollTo(0,y); });
+    else if (state.firstPaint && !location.hash && !window.__SNAPSHOT_DATE__) {
+      state.firstPaint = false;
+      requestAnimationFrame(function(){ var target=document.getElementById("m03"); if(target) target.scrollIntoView({block:"start"}); });
+    }
+  };
+  function bindOverview() {
+    document.querySelectorAll("[data-signal-filter]").forEach(function(button){button.addEventListener("click",function(event){event.stopPropagation();state.signalFilter=button.dataset.signalFilter;APP.renderOverview(true);});});
+    document.querySelectorAll("[data-period-filter]").forEach(function(button){button.addEventListener("click",function(){state.periodFilter=button.dataset.periodFilter;APP.renderOverview(true);});});
+    document.querySelectorAll("[data-logic]").forEach(function(button){button.addEventListener("click",function(){state.logicMode=button.dataset.logic;APP.renderOverview(true);});});
+  }
+  function observeToc() {
+    if (observer) observer.disconnect();
+    observer = new IntersectionObserver(function(entries){ entries.forEach(function(entry){ if(entry.isIntersecting){ document.querySelectorAll("[data-toc]").forEach(function(link){link.classList.toggle("active",link.dataset.toc===entry.target.id);}); }}); },{rootMargin:"-70px 0px -70% 0px",threshold:.01});
+    document.querySelectorAll(".overview-main .module[id]").forEach(function(section){observer.observe(section);});
+  }
+  function renderMacro() {
+    var macro=o(D.macro), groups=a(macro.groups), calendar=a(macro.calendar), root=document.getElementById("macroPage");
+    root.innerHTML='<div class="tab-hero"><div><small>MACRO TRANSMISSION MAP</small><h1>宏观观察</h1><p>区分影响盈利预期的变量，与影响 PE / 贴现率的变量；每组标明传导逻辑与下一节点。</p></div><div class="hero-stat"><span>当前宏观温度</span><b>中性偏紧</b><small>风险资产分化</small></div></div>' + (groups.length?'<section class="macro-grid">'+groups.map(function(item,index){return '<article class="card macro-card" data-open-macro="'+index+'"><header class="card-head"><h2>'+esc(item.name)+'</h2><div class="meta">0'+(index+1)+'</div></header><div class="body"><div class="icon">'+esc(item.icon)+'</div><strong>'+esc(item.value)+'</strong>'+badge(item.direction,item.direction.indexOf("压")>=0||item.direction.indexOf("风险")>=0?"bad":"observe")+'<p>'+esc(item.desc)+'</p><footer><span>TRANSMISSION</span><b>'+esc(item.affects)+'</b></footer><small style="display:block;margin-top:7px;color:var(--muted)">NEXT · '+esc(item.next)+'</small></div></article>';}).join("")+'</section>':empty()) + '<section class="macro-calendar"><div class="panel-title"><h2>宏观日历</h2><span>未来 30 天</span></div>'+calendar.map(function(item){return '<div class="calendar-row"><time>'+esc(item.date)+'</time><b>'+esc(item.event)+'</b><span>'+esc(item.affects)+'</span>'+badge(item.level,item.level==="高"?"bad":"observe")+'</div>';}).join("")+'</section>';
+  }
+  function renderFunds() {
+    var h=o(D.holdings_13f), funds=a(h.funds), inflow=a(h.consensus_inflow), outflow=a(h.consensus_outflow), sectors=a(h.flows_sectors), root=document.getElementById("fundsPage");
+    root.innerHTML='<div class="tab-hero"><div><small>INSTITUTIONAL POSITIONING · 13F</small><h1>全景资金动向</h1><p>'+esc(h.summary_overview||"当前快照未包含资金摘要。")+'</p></div><a class="source" target="_blank" rel="noopener" href="'+SOURCE_URLS.SEC+'">SEC 官方口径 ↗</a></div><div class="lag-note"><b>!</b><span><strong>13F 存在披露滞后</strong>　'+esc(h.funds_note||"报告的是季末持仓，不等同于实时交易。")+'</span></div>' + (funds.length?'<section class="fund-kpis"><div class="fund-kpi"><small>TRACKED FUNDS</small><b>'+funds.length+'</b><span>头部科技 / 对冲基金</span></div><div class="fund-kpi"><small>13F AUM</small><b>'+esc(o(h.aum_meta).aum_13f||"—")+'</b><span>申报口径</span></div><div class="fund-kpi"><small>FIRM AUM</small><b>'+esc(o(h.aum_meta).aum_firm||"—")+'</b><span>机构管理总规模</span></div><div class="fund-kpi"><small>WATCH</small><b>'+a(h.watch_priority).length+'</b><span>重点跟踪标的</span></div></section><section class="grid grid-2"><article class="card"><header class="card-head"><h2>共识流入 / 流出</h2><div class="meta">RELATIVE SCALE</div></header><div class="flow-bars">'+inflow.concat(outflow).map(function(item){return '<div class="flow-bar"><b>'+esc(item.ticker)+'</b><span><i class="'+(item.score<0?"out":"")+'" style="width:'+Math.abs(item.score)+'%"></i></span><em>'+(item.score>0?"+":"")+item.score+'</em></div>';}).join("")+'</div></article><article class="card"><header class="card-head"><h2>板块增减仓排序</h2><div class="meta">SECTOR FLOW</div></header><div class="flow-bars">'+sectors.map(function(item){return '<div class="flow-bar"><b>'+esc(item.name)+'</b><span><i class="'+(item.score<0?"out":"")+'" style="width:'+Math.abs(item.score)+'%"></i></span><em>'+(item.score>0?"+":"")+item.score+'</em></div>';}).join("")+'</div></article></section><section class="fund-cards">'+funds.map(function(item,index){return '<button class="fund-card" data-open-fund="'+index+'"><header><span>0'+(index+1)+'</span>'+badge(item.move,item.move==="增持"?"good":item.move==="减持"?"bad":"neutral")+'</header><h3>'+esc(item.name)+'</h3><b>'+esc(item.focus)+'</b><p>'+esc(item.note)+'</p><footer><span>信号评分</span><em>'+item.score+'</em></footer></button>';}).join("")+'</section>':empty());
+  }
+  function renderTrade() {
+    var trade=o(D.trade), rows=a(trade.rows), rules=a(trade.rules), root=document.getElementById("tradePage");
+    root.innerHTML='<div class="tab-hero"><div><small>EXECUTION SIGNALS · RULE BASED</small><h1>交易时点提示</h1><p>'+esc(trade.intro||"产业趋势回答买什么，交易规则回答什么时候动。")+'</p></div><div class="hero-stat"><span>报价口径</span><b>'+esc(trade.asof||"—")+'</b><small>交易前需使用券商实时行情复核</small></div></div><section class="rules-grid">'+rules.map(function(rule,index){return '<article class="rule-card"><header><span>0'+(index+1)+'</span>'+badge(rule.name,rule.name==="卖出"?"bad":rule.name==="减仓"?"observe":"good")+'</header><p><b>'+esc(rule.name)+'</b><br>'+esc(rule.desc)+'</p></article>';}).join("")+'</section>'+(rows.length?'<section class="trade-shell"><table class="trade-table"><thead><tr><th>标的</th><th>价格</th><th>动作</th><th>评分</th><th>MA20</th><th>MA50</th><th>MA200</th><th>距20D</th><th>距50D</th><th>买入区间</th><th>财报</th><th>近期事件</th></tr></thead><tbody>'+rows.map(function(item){return '<tr data-open-trade="'+item.ticker+'"><td>'+esc(item.ticker)+'</td><td>'+esc(item.cur)+'</td><td>'+badge(item.action,item.action==="加仓"||item.action==="分批"?"good":"observe")+'</td><td class="score">'+item.score+'</td><td>'+item.ma20+'</td><td>'+item.ma50+'</td><td>'+item.ma200+'</td><td>'+item.d20+'%</td><td>'+item.d50+'%</td><td>'+item.buy_lo+'—'+item.buy_hi+'</td><td>'+esc(item.earn_days==null?"—":item.earn_days+"天")+'</td><td>'+esc(item.event_title)+'</td></tr>';}).join("")+'</tbody></table><div class="method-note">'+esc(trade.disclaimer)+'　'+esc(a(trade.skipped).join("；"))+'</div></section>':empty());
+  }
+  function tradeDrawer(ticker) {
+    var item=a(o(D.trade).rows).filter(function(row){return row.ticker===ticker;})[0]; if(!item)return null;
+    return {eyebrow:"TRADE SIGNAL · "+ticker,title:item.action+" · 评分 "+item.score,html:'<div class="drawer-kpis"><div class="drawer-kpi"><small>当前价</small><b>'+item.cur+'</b></div><div class="drawer-kpi"><small>距 MA20</small><b>'+item.d20+'%</b></div><div class="drawer-kpi"><small>距 MA50</small><b>'+item.d50+'%</b></div></div><h3>触发因素</h3><p>'+esc(item.event_title)+'。买入区间 '+item.buy_lo+'—'+item.buy_hi+'；距财报 '+esc(item.earn_days==null?"—":item.earn_days+" 天")+'。</p><div class="logic-box"><b>过热</b><span>'+(item.overheated?"是":"否")+'</span><b>止损触发</b><span>'+(item.stop_hit?"是":"否")+'</span><b>近期重大新闻</b><span>'+(item.news_recent?"是":"否")+'</span><b>执行纪律</b><span>临近财报降低动作强度；跌破止损或逻辑证伪时不摊薄成本。</span></div>'};
+  }
+  function demandDrawer(key) {
+    var item=a(o(D.demand_core).cards).filter(function(x){return x.key===key;})[0]; if(!item)return null;
+    return {eyebrow:"DEMAND CORE · "+item.key,title:item.label,html:'<div class="drawer-kpis"><div class="drawer-kpi"><small>当前值</small><b>'+esc(item.value)+'</b></div><div class="drawer-kpi"><small>变化</small><b style="font-size:10px">'+esc(item.delta)+'</b></div></div><h3>验证逻辑</h3><p>'+esc(item.desc)+'</p><div class="logic-box"><b>来源</b><span>'+source(item.source,item.credibility)+'</span><b>口径</b><span>'+esc(item.value_sub)+'</span><b>事实 / 预期</b><span>'+(item.forecast_from!=null?"包含 E 标记的指引或预期":"实绩序列")+'</span></div>'};
+  }
+  function earningDrawer(index) {
+    var item=a(D.earnings_trends)[index]; if(!item)return null;
+    return {eyebrow:"EARNINGS CORE · "+item.priority,title:item.metric,html:'<div class="drawer-kpis"><div class="drawer-kpi"><small>信号评分</small><b>'+item.value+'</b></div><div class="drawer-kpi"><small>影响排序</small><b>0'+item.impact_rank+'</b></div></div><h3>为什么关注</h3><p>'+esc(item.reason)+'</p><div class="logic-box"><b>实绩</b><span>'+esc(a(item.actual).join(" · "))+'</span><b>指引 / 预期 E</b><span>'+esc(a(item.estimate).join(" · ")||"无")+'</span><b>来源</b><span>'+source(item.source,item.credibility)+'</span></div>'};
+  }
+  function etfDrawer(ticker) {
+    var item=a(D.etf_focus).filter(function(x){return x.ticker===ticker;})[0]; if(!item)return null;
+    return {eyebrow:"ETF · "+ticker,title:item.name,html:'<div class="drawer-kpis"><div class="drawer-kpi"><small>配置角色</small><b style="font-size:10px">'+esc(item.role)+'</b></div></div><h3>PM 判断</h3><p>'+esc(item.verdict)+'</p><div class="logic-box"><b>回测</b><span>只使用 backtest.monthly 中真实月末价格；缺失时剔除。</span><b>用途</b><span>分散单票、监管与客户集中风险。</span></div>'};
+  }
+  function rumorDrawer(id) {
+    var item=a(D.rumors).filter(function(x){return x.id===id;})[0]; if(!item)return null;
+    return {eyebrow:"RUMOR VALIDATION · "+item.date,title:item.name,html:'<div class="drawer-actions">'+badge(item.impact)+badge(item.impact_tier,"observe")+'</div><h3>为什么需要验证</h3><p>'+esc(item.rationale)+'</p><div class="logic-box"><b>可信度</b><span>'+item.confidence+'</span><b>逻辑吻合度</b><span>'+item.logicFit+'</span><b>风险敞口</b><span>'+item.risk+'</span><b>相关公司</b><span>'+esc(item.companies.join(" · "))+'</span><b>下一验证</b><span>'+esc(item.verify)+'</span></div>'};
+  }
+  function macroDrawer(index) {
+    var item=a(o(D.macro).groups)[index]; if(!item)return null;
+    return {eyebrow:"MACRO GROUP · 0"+(index+1),title:item.name,html:'<div class="drawer-kpis"><div class="drawer-kpi"><small>当前状态</small><b style="font-size:10px">'+esc(item.value)+'</b></div><div class="drawer-kpi"><small>方向</small><b style="font-size:10px">'+esc(item.direction)+'</b></div></div><h3>传导逻辑</h3><p>'+esc(item.desc)+'</p><div class="logic-box"><b>影响对象</b><span>'+esc(item.affects)+'</span><b>下次节点</b><span>'+esc(item.next)+'</span></div>'};
+  }
+  function priorityDrawer(id) {
+    var item=a(o(D.chain_logic).profit_priority).filter(function(x){return x.id===id;})[0]; if(!item)return null;
+    return {eyebrow:"PROFIT PRIORITY",title:item.name,html:'<div class="drawer-kpis"><div class="drawer-kpi"><small>确定性评分</small><b>'+item.score+'</b></div></div><h3>当前判断</h3><p>'+esc(item.verdict)+'</p><div class="logic-box"><b>公司</b><span>'+esc(item.companies.join(" · "))+'</span><b>排序含义</b><span>按盈利确定性、供给卡位与竞争格局排序，不代表不考虑估值。</span></div>'};
+  }
+  function switchTab(tab) {
+    state.tab=tab;
+    document.querySelectorAll(".main-tabs button").forEach(function(button){button.classList.toggle("active",button.dataset.tab===tab);});
+    document.querySelectorAll(".screen").forEach(function(screen){screen.classList.toggle("active",screen.id==="screen-"+tab);});
+    if(tab==="macro") renderMacro();
+    if(tab==="funds") renderFunds();
+    if(tab==="portfolio") APP.portfolio.render();
+    if(tab==="trade") renderTrade();
+    if(tab==="alerts") APP.alerts.render();
+    window.scrollTo(0,0);
+  }
+  APP.switchTab=switchTab;
+  APP.toast=function(message){
+    var el=document.getElementById("toast");el.textContent=message;el.classList.add("show");clearTimeout(APP._toast);APP._toast=setTimeout(function(){el.classList.remove("show");},1800);
+  };
+  function openItem(item){if(item)APP.drawer.open(item);}
+  function renderSearch(query){
+    var root=document.getElementById("searchResults"), q=query.trim().toLowerCase(); if(!q){root.classList.add("hidden");root.innerHTML="";return;}
+    var results=[];
+    Object.keys(o(D.companies)).forEach(function(ticker){var item=D.companies[ticker];if([ticker,item.name,item.cn,item.logic].join(" ").toLowerCase().indexOf(q)>=0)results.push({type:"company",id:ticker,label:ticker,desc:item.cn+" · "+item.logic,score:"公司"});});
+    a(D.signals).forEach(function(item){if([item.claim,item.sector,item.chain,a(item.companies).join(" ")].join(" ").toLowerCase().indexOf(q)>=0)results.push({type:"signal",id:item.id,label:item.date.slice(5),desc:item.claim,score:item.impact});});
+    a(D.chains).forEach(function(item){if([item.name,item.highlight,a(item.companies).join(" ")].join(" ").toLowerCase().indexOf(q)>=0)results.push({type:"chain",id:item.id,label:item.score,desc:item.name+" · "+item.evidence,score:"链条"});});
+    MODULES.forEach(function(group){group[1].forEach(function(item){if(item[1].toLowerCase().indexOf(q)>=0)results.push({type:"module",id:item[0],label:item[0],desc:item[1],score:"模块"});});});
+    root.innerHTML=results.slice(0,8).map(function(item){return '<button data-search-type="'+item.type+'" data-search-id="'+esc(item.id)+'"><b>'+esc(item.label)+'</b><span>'+esc(item.desc)+'</span><em>'+esc(item.score)+'</em></button>';}).join("") || '<div style="padding:9px;color:var(--muted)">无匹配结果</div>';
+    root.classList.remove("hidden");
+  }
+  function bindGlobal(){
+    document.getElementById("mainTabs").addEventListener("click",function(event){var button=event.target.closest("[data-tab]");if(button)switchTab(button.dataset.tab);});
+    document.getElementById("brandHome").addEventListener("click",function(){switchTab("overview");var target=document.getElementById("m03");if(target)target.scrollIntoView();});
+    var theme=localStorage.getItem("aime_theme_v2")||"dark";document.documentElement.dataset.theme=theme;
+    document.getElementById("themeBtn").addEventListener("click",function(){theme=theme==="dark"?"light":"dark";document.documentElement.dataset.theme=theme;localStorage.setItem("aime_theme_v2",theme);});
+    var search=document.getElementById("globalSearch");search.addEventListener("input",function(){renderSearch(search.value);});
+    document.addEventListener("keydown",function(event){if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="k"){event.preventDefault();search.focus();}});
+    document.addEventListener("click",function(event){
+      var t=event.target.closest("[data-note],[data-open-company],[data-open-signal],[data-open-chain],[data-open-industry],[data-open-fund],[data-open-risk],[data-open-discovery],[data-open-trade],[data-open-demand],[data-open-earning],[data-open-etf],[data-open-rumor],[data-open-macro],[data-open-priority],[data-search-type],[data-watch]");
+      if(!t){if(!event.target.closest(".search"))document.getElementById("searchResults").classList.add("hidden");return;}
+      if(t.dataset.watch){event.preventDefault();event.stopPropagation();APP.discovery.toggle(t.dataset.watch);return;}
+      if(t.dataset.note){APP.note(t.dataset.note);return;}
+      if(t.dataset.openCompany)openItem(companyDrawer(t.dataset.openCompany));
+      if(t.dataset.openSignal)openItem(signalDrawer(t.dataset.openSignal));
+      if(t.dataset.openChain)openItem(chainDrawer(t.dataset.openChain));
+      if(t.dataset.openIndustry)openItem(industryDrawer(t.dataset.openIndustry));
+      if(t.dataset.openFund!=null)openItem(fundDrawer(Number(t.dataset.openFund)));
+      if(t.dataset.openRisk)openItem(riskDrawer(t.dataset.openRisk));
+      if(t.dataset.openDiscovery)openItem(discoveryDrawer(t.dataset.openDiscovery));
+      if(t.dataset.openTrade)openItem(tradeDrawer(t.dataset.openTrade));
+      if(t.dataset.openDemand)openItem(demandDrawer(t.dataset.openDemand));
+      if(t.dataset.openEarning!=null)openItem(earningDrawer(Number(t.dataset.openEarning)));
+      if(t.dataset.openEtf)openItem(etfDrawer(t.dataset.openEtf));
+      if(t.dataset.openRumor)openItem(rumorDrawer(t.dataset.openRumor));
+      if(t.dataset.openMacro!=null)openItem(macroDrawer(Number(t.dataset.openMacro)));
+      if(t.dataset.openPriority)openItem(priorityDrawer(t.dataset.openPriority));
+      if(t.dataset.searchType){
+        var type=t.dataset.searchType,id=t.dataset.searchId;search.value="";renderSearch("");
+        if(type==="company")openItem(companyDrawer(id));if(type==="signal")openItem(signalDrawer(id));if(type==="chain")openItem(chainDrawer(id));
+        if(type==="module"){switchTab("overview");var module=document.getElementById("m"+id);if(module)module.scrollIntoView();}
+      }
+    });
+  }
+  function init(){
+    APP.initDrawer();APP.discovery.mount();APP.portfolio.mount();APP.alerts.mount();APP.snapshots.mount();APP.whatsnew.mount();bindGlobal();
+    document.getElementById("liveCount").textContent=o(D.meta).total_signals==null?"—":o(D.meta).total_signals;
+    APP.renderOverview(false);renderMacro();renderFunds();renderTrade();
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+}());
+
+</script>
 </body>
 </html>
