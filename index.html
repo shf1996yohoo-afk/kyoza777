@@ -2156,6 +2156,71 @@ table.ind-cmp-table thead th:first-child { z-index: 3; background: var(--bg-card
 .snap-date:hover, .snap-date:focus { border-color: var(--primary); }
 .snap-date .snap-opt-empty { color: var(--text-mute); font-style: italic; }
 
+/* 最新行情刷新与数据新鲜度 */
+.market-refresh {
+  display: inline-flex; align-items: center; gap: 7px;
+  min-width: 132px; padding: 5px 9px;
+  background: linear-gradient(135deg, rgba(59,130,246,.15), rgba(34,197,94,.09));
+  border: 1px solid rgba(96,165,250,.42);
+  border-radius: 7px;
+  color: var(--text);
+  cursor: pointer;
+  font-family: var(--sans);
+  text-align: left;
+  transition: border-color .15s, background .15s, transform .15s;
+}
+.market-refresh:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, rgba(59,130,246,.23), rgba(34,197,94,.12));
+  transform: translateY(-1px);
+}
+.market-refresh:disabled { cursor: not-allowed; opacity: .62; transform: none; }
+.market-refresh-ico {
+  display: grid; place-items: center;
+  width: 22px; height: 22px; flex: none;
+  border-radius: 50%;
+  background: rgba(96,165,250,.16);
+  color: var(--primary);
+  font-size: 17px; font-weight: 800; line-height: 1;
+}
+.market-refresh-copy { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; }
+.market-refresh-copy b { font-size: 11px; white-space: nowrap; }
+.market-refresh-copy small {
+  margin-top: 3px; color: var(--text-dim);
+  font: 9.5px/1.1 var(--mono); white-space: nowrap;
+}
+.market-refresh.is-live { border-color: rgba(34,197,94,.45); }
+.market-refresh.is-live .market-refresh-ico { color: var(--good); background: rgba(34,197,94,.13); }
+.market-refresh.is-loading .market-refresh-ico { animation: market-spin .8s linear infinite; }
+.market-refresh.is-error { border-color: rgba(239,68,68,.48); }
+.market-refresh.is-error .market-refresh-ico { color: var(--bad); background: rgba(239,68,68,.12); }
+@keyframes market-spin { to { transform: rotate(360deg); } }
+
+.freshness-bar {
+  display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+  padding: 6px 20px;
+  background: rgba(15,36,56,.82);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 10.5px;
+}
+body.light .freshness-bar { background: rgba(241,245,249,.92); }
+.freshness-title {
+  color: var(--text); font-weight: 800; letter-spacing: .04em;
+  margin-right: 2px;
+}
+.freshness-chip {
+  padding: 2px 7px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font: 9.5px/1.4 var(--mono);
+  white-space: nowrap;
+}
+.freshness-chip.research { color: var(--primary); background: rgba(59,130,246,.09); }
+.freshness-chip.market { color: var(--good); background: rgba(34,197,94,.08); }
+.freshness-chip.filing { color: var(--rumor); background: rgba(245,158,11,.08); }
+.freshness-note { margin-left: auto; color: var(--text-mute); }
+
 /* 历史快照提示条 */
 .snap-banner {
   position: sticky; top: 49px; z-index: 99;
@@ -2186,6 +2251,10 @@ table.ind-cmp-table thead th:first-child { z-index: 3; background: var(--bg-card
 @media (max-width: 900px) {
   .snap-nav-lb { display: none; }
   .snap-banner { font-size: 11.5px; padding: 7px 12px; }
+  .freshness-bar { padding: 6px 12px; }
+  .freshness-note { flex: 1 1 100%; margin-left: 0; }
+  .market-refresh { min-width: auto; }
+  .market-refresh-copy small { display: none; }
 }
 
 /* ===== 趋势图统一视觉语言图例：实绩(实线/实心) vs 预期(虚线/空心) ===== */
@@ -2650,7 +2719,7 @@ table.ind-cmp-table thead th:first-child { z-index: 3; background: var(--bg-card
 /* 中等宽度桌面：搜索框独占第二行，避免顶栏把品牌与日期压成窄竖列。 */
 @media (max-width: 1480px) {
   .topbar { flex-wrap: wrap; gap: 8px 10px; padding: 8px 12px; }
-  .brand, .live-tag, .snap-nav, .tabs { flex: 0 0 auto; }
+  .brand, .live-tag, .snap-nav, .market-refresh, .tabs { flex: 0 0 auto; }
   .brand-title, .brand-sub { white-space: nowrap; }
   .brand-sub, .snap-nav-lb { display: none; }
   .tab-btn { padding-left: 10px; padding-right: 10px; }
@@ -3800,6 +3869,277 @@ var Fr={},Gr={};var Wr,Hr=function(){function t(t,e,n){var i=this;this._sleepAft
   window.DATA = D;
 })();
 </script>
+<!-- 行情刷新层：从同源自动更新文件读取最新可用收盘行情；研究信号/13F 日期保持独立。 -->
+<script>
+/* ==========================================================
+   live-refresh.js — 最新可用收盘行情刷新层
+
+   约束：
+   1) 只更新价格、涨跌、均线、回撤与价格型交易状态。
+   2) 不改写研究快照日期、基本面信号、新闻判断或 13F 报告期。
+   3) 数据由 GitHub Actions 写入同源 market-latest.json，避免浏览器
+      直连第三方行情接口的 CORS 与密钥风险。
+   ========================================================== */
+(function () {
+  "use strict";
+
+  var D = window.__DASHBOARD_DATA__ || {};
+  var CACHE_KEY = "aime_market_refresh_v1";
+  var ENDPOINT = "assets/market-latest.json";
+  var cachedApplied = false;
+
+  function lastDate(value) {
+    if (!value) return "";
+    var matches = String(value).match(/\d{4}-\d{2}-\d{2}/g);
+    return matches && matches.length ? matches[matches.length - 1] : "";
+  }
+
+  function shortDate(value) {
+    var date = lastDate(value);
+    if (!date) return "—";
+    var parts = date.split("-");
+    return (+parts[1]) + "/" + (+parts[2]);
+  }
+
+  function round(value, digits) {
+    var n = Number(value);
+    if (!Number.isFinite(n)) return null;
+    var scale = Math.pow(10, digits == null ? 1 : digits);
+    return Math.round(n * scale) / scale;
+  }
+
+  function pctDistance(last, average) {
+    if (!Number.isFinite(Number(last)) || !Number.isFinite(Number(average)) || Number(average) === 0) return null;
+    return round((Number(last) / Number(average) - 1) * 100, 1);
+  }
+
+  function validPayload(payload) {
+    if (!payload || payload.schema_version !== 1 || !payload.quotes || typeof payload.quotes !== "object") return false;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(payload.quote_asof || ""))) return false;
+    var validQuotes = Object.keys(payload.quotes).filter(function (ticker) {
+      var quote = payload.quotes[ticker];
+      return quote && Number.isFinite(Number(quote.last)) && Array.isArray(quote.closes) && quote.closes.length >= 5;
+    });
+    return validQuotes.length >= 6;
+  }
+
+  function applyCompanyQuote(ticker, quote) {
+    var company = (D.companies || {})[ticker];
+    if (!company || !quote) return;
+    var closes = quote.closes.map(Number).filter(Number.isFinite);
+    var dates = Array.isArray(quote.dates) ? quote.dates.slice(-closes.length) : [];
+    company.last = round(quote.last, 2);
+    company.chg = round(quote.chg_pct, 2);
+    company.closes = closes.slice(-30);
+    company.market_asof = quote.asof;
+    company.market_source = quote.source || "Yahoo Finance chart";
+    if (quote.currency === "KRW") company.cur = "₩";
+    else if (quote.currency === "USD") company.cur = "$";
+    company.trend = {
+      dates: dates.slice(-30),
+      closes: closes.slice(-30),
+      mtd_pct: round(quote.mtd_pct, 1),
+      peak20: round(quote.peak20, 2),
+      dd_from_peak20: round(quote.dd_from_peak20, 1)
+    };
+  }
+
+  function applyTradeQuote(row, quote) {
+    if (!row || !quote) return;
+    row.base_score = row.base_score == null ? Number(row.score || 50) : Number(row.base_score);
+    row.research_action = row.research_action || row.action;
+    row.last = round(quote.last, 2);
+    row.asof = quote.asof;
+    row.ma20 = round(quote.ma20, 2);
+    row.ma50 = round(quote.ma50, 2);
+    row.ma200 = round(quote.ma200, 2);
+    row.d20 = pctDistance(row.last, row.ma20);
+    row.d50 = pctDistance(row.last, row.ma50);
+    row.d200 = pctDistance(row.last, row.ma200);
+    row.ret5 = round(quote.ret5, 1);
+    row.ret20 = round(quote.ret20, 1);
+    row.amp5 = round(quote.amp5, 1);
+    row.amp20 = round(quote.amp20, 1);
+    row.dd = round(quote.dd_from_peak20, 1);
+
+    if (Number.isFinite(Number(row.ma50))) {
+      row.buy_lo = round(Number(row.ma50) * 0.98, 2);
+      row.buy_hi = round(Number(row.ma50) * 1.03, 2);
+    }
+    row.at_buy = Number.isFinite(Number(row.buy_lo)) && Number.isFinite(Number(row.buy_hi))
+      ? row.last >= row.buy_lo && row.last <= row.buy_hi
+      : false;
+    row.overheated = Number.isFinite(Number(row.d50)) && row.d50 > 20;
+    row.stop_hit = (Number.isFinite(Number(row.d200)) && row.d200 < -5) ||
+      (Number.isFinite(Number(row.dd)) && row.dd <= -18);
+
+    var score = row.base_score;
+    if (row.at_buy) score += 8;
+    if (Number.isFinite(Number(row.d20)) && row.d20 < 0 && row.d20 >= -8) score += 4;
+    if (row.overheated) score -= 12;
+    if (row.stop_hit) score -= 25;
+    row.score = Math.max(0, Math.min(100, Math.round(score)));
+
+    if (row.stop_hit) row.action = "减仓";
+    else if (row.overheated) row.action = "观望";
+    else if (row.at_buy && (!Number.isFinite(Number(row.d200)) || row.d200 >= 0)) row.action = "买入";
+    else if (Number.isFinite(Number(row.d20)) && row.d20 < 0 && Number.isFinite(Number(row.d50)) && row.d50 > 0) row.action = "加仓";
+    else row.action = "观望";
+
+    row.market_refreshed = true;
+    row.samples = ["最新收盘", "MA20/50/200", "5D/20D 波动", "研究快照仍为 " + lastDate(D.meta && D.meta.period)];
+    row.adj = "行情刷新后按同一价格规则重算；基本面、新闻与财报判断仍以研究快照为准。";
+  }
+
+  function applyPayload(payload, sourceLabel) {
+    if (!validPayload(payload) || window.__SNAPSHOT_DATE__) return false;
+    var bundledAsOf = lastDate(D.meta && D.meta.quote_asof);
+    if (bundledAsOf && payload.quote_asof < bundledAsOf) return false;
+
+    Object.keys(payload.quotes).forEach(function (ticker) {
+      applyCompanyQuote(ticker, payload.quotes[ticker]);
+    });
+    ((D.trade && D.trade.rows) || []).forEach(function (row) {
+      var quote = payload.quotes[row.ticker];
+      if (quote) applyTradeQuote(row, quote);
+    });
+
+    D.meta = D.meta || {};
+    D.meta.quote_asof = payload.quote_asof;
+    D.meta.market_refreshed_at = payload.generated_at;
+    D.meta.market_source = payload.source || "Yahoo Finance chart";
+    D.meta.market_refresh_mode = sourceLabel || "same-origin";
+    D.meta.market_quote_count = Object.keys(payload.quotes).length;
+    if (D.trade) {
+      D.trade.asof = payload.quote_asof;
+      D.trade.asof_note = "价格、均线、回撤与买入区间已刷新至 " + payload.quote_asof +
+        "；研究信号、新闻、财报与基本面判断仍以 " + lastDate(D.meta.period) + " 研究快照为准。";
+    }
+    window.DATA = D;
+    return true;
+  }
+
+  function readCache() {
+    try {
+      var raw = localStorage.getItem(CACHE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function writeCache(payload) {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
+    } catch (error) {}
+  }
+
+  function setText(id, text) {
+    var node = document.getElementById(id);
+    if (node) node.textContent = text;
+  }
+
+  function showToast(message) {
+    if (window.APP && window.APP.toast) {
+      window.APP.toast(message);
+      return;
+    }
+    var node = document.getElementById("toast");
+    if (!node) return;
+    node.textContent = message;
+    node.classList.add("show");
+    setTimeout(function () { node.classList.remove("show"); }, 2600);
+  }
+
+  function renderFreshness() {
+    var researchDate = lastDate(D.meta && D.meta.period) || "—";
+    var marketDate = lastDate(D.meta && D.meta.quote_asof) || "—";
+    var filing = (((D.holdings_13f || {}).flows_meta || {}).reported_asof) ||
+      (((D.holdings_13f || {}).flows_meta || {}).period) || "—";
+    var historical = !!window.__SNAPSHOT_DATE__;
+    var button = document.getElementById("market-refresh");
+
+    setText("fresh-research", "研究信号 " + researchDate + " · 快照");
+    setText("fresh-market", "行情 " + marketDate + " · 最新可用收盘");
+    setText("fresh-filing", "13F " + filing + " · 法定滞后");
+    setText("market-refresh-asof", historical ? "历史快照不可刷新" : "行情 " + shortDate(marketDate));
+    setText("freshness-note", historical
+      ? "正在查看历史快照；返回最新视图后才能刷新行情。"
+      : "点击刷新会更新价格、均线、回撤和价格型交易状态；研究信号与 13F 日期保持不变。");
+
+    if (button) {
+      button.disabled = historical;
+      button.classList.toggle("is-live", cachedApplied);
+      button.classList.remove("is-loading", "is-error");
+    }
+  }
+
+  function onRefresh() {
+    var button = document.getElementById("market-refresh");
+    if (!button || button.disabled) return;
+    button.disabled = true;
+    button.classList.add("is-loading");
+    setText("market-refresh-label", "正在刷新");
+    setText("market-refresh-asof", "读取自动更新源…");
+
+    if (location.protocol === "file:") {
+      button.disabled = false;
+      button.classList.remove("is-loading");
+      button.classList.add("is-error");
+      setText("market-refresh-label", "离线版");
+      setText("market-refresh-asof", "请打开线上版刷新");
+      showToast("离线文件无法连接自动行情源，请使用 GitHub Pages 线上版本。");
+      return;
+    }
+
+    fetch(ENDPOINT + "?t=" + Date.now(), { cache: "no-store" })
+      .then(function (response) {
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        return response.json();
+      })
+      .then(function (payload) {
+        if (!validPayload(payload)) throw new Error("行情文件不完整");
+        writeCache(payload);
+        if (!applyPayload(payload, "manual-refresh")) throw new Error("行情日期早于当前页面");
+        cachedApplied = true;
+        setText("market-refresh-label", "刷新完成");
+        setText("market-refresh-asof", "行情 " + shortDate(payload.quote_asof));
+        showToast("行情已刷新至 " + payload.quote_asof + "，正在重算价格指标。");
+        setTimeout(function () { location.reload(); }, 650);
+      })
+      .catch(function () {
+        button.disabled = false;
+        button.classList.remove("is-loading");
+        button.classList.add("is-error");
+        setText("market-refresh-label", "刷新失败");
+        setText("market-refresh-asof", "保留当前数据");
+        showToast("自动行情源暂不可用，页面已保留原数据，请稍后重试。");
+      });
+  }
+
+  if (!window.__SNAPSHOT_DATE__) {
+    var cached = readCache();
+    if (cached && validPayload(cached)) cachedApplied = applyPayload(cached, "local-cache");
+  }
+
+  function init() {
+    renderFreshness();
+    var button = document.getElementById("market-refresh");
+    if (button) button.addEventListener("click", onRefresh);
+  }
+
+  window.MarketRefresh = {
+    endpoint: ENDPOINT,
+    apply: applyPayload,
+    isValid: validPayload,
+    render: renderFreshness
+  };
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+})();
+
+</script>
 </head>
 <body>
 
@@ -3822,6 +4162,16 @@ var Fr={},Gr={};var Wr,Hr=function(){function t(t,e,n){var i=this;this._sleepAft
     <select class="snap-date" id="snap-date" aria-label="选择看板日期"></select>
   </div>
 
+  <button class="market-refresh" id="market-refresh" type="button"
+    title="刷新最新可用收盘行情并重算均线、回撤、买入区间与交易状态；研究信号和 13F 不会被伪装成实时数据"
+    aria-label="刷新今日数据">
+    <span class="market-refresh-ico" aria-hidden="true">↻</span>
+    <span class="market-refresh-copy">
+      <b id="market-refresh-label">刷新今日数据</b>
+      <small id="market-refresh-asof">行情载入中</small>
+    </span>
+  </button>
+
   <div class="tabs" id="main-tabs">
     <button class="tab-btn active" data-tab="overview">总览 Overview</button>
     <button class="tab-btn" data-tab="macro">🌐 宏观观察</button>
@@ -3837,6 +4187,14 @@ var Fr={},Gr={};var Wr,Hr=function(){function t(t,e,n){var i=this;this._sleepAft
   </div>
 
   <button class="theme-toggle" id="theme-toggle">☾ 主题</button>
+</div>
+
+<div class="freshness-bar" id="freshness-bar" aria-label="数据新鲜度">
+  <span class="freshness-title">数据新鲜度</span>
+  <span class="freshness-chip research" id="fresh-research">研究信号 —</span>
+  <span class="freshness-chip market" id="fresh-market">行情 —</span>
+  <span class="freshness-chip filing" id="fresh-filing">13F —</span>
+  <span class="freshness-note" id="freshness-note">行情可刷新；研究信号与机构披露按各自日期显示。</span>
 </div>
 
 <!-- filter bar (overview scope) -->
@@ -8477,16 +8835,16 @@ var Fr={},Gr={};var Wr,Hr=function(){function t(t,e,n){var i=this;this._sleepAft
      加载历史快照时 D 即该快照数据，故这些值自动跟随该快照 meta，不会串。 */
   function applyHeaderDates() {
     var meta = (D && D.meta) || {};
+    var qd = _lastDate(meta.quote_asof) || TODAY_REF;
     var bs = $("brand-sub");
-    if (bs) bs.textContent = "BLOOMBERG-STYLE · PM VIEW · " + TODAY_REF;
+    if (bs) bs.textContent = "PM VIEW · RESEARCH " + TODAY_REF + " · MARKET " + qd;
     var tag = $("tl-today-tag");
     if (tag) tag.textContent = "TODAY " + mdLabel(TODAY);
     var foot = $("app-foot");
     if (foot) {
-      var qd = _lastDate(meta.quote_asof) || TODAY_REF;
       var nsig = meta.total_signals || ((D.signals ? D.signals.length : 0) + (D.rumors ? D.rumors.length : 0));
-      foot.textContent = "Aime 投研工作台 v2 · 数据源：evidence.md " + (nsig || 89) + " 条 signal + yfinance 报价 (" +
-        qd + " 收盘) · 数据日期 " + TODAY_REF + " · 图表基于 ECharts 5.5.0 · 无 evidence 处标注「分析师估算」";
+      foot.textContent = "Aime 投研工作台 v2 · 研究快照 " + TODAY_REF + "（evidence.md " + (nsig || 89) +
+        " 条 signal）· 行情 " + qd + " 最新可用收盘 · 13F 按法定报告期显示 · 图表基于 ECharts 5.5.0 · 无 evidence 处标注「分析师估算」";
     }
   }
 
