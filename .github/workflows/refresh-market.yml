@@ -1,0 +1,42 @@
+name: Refresh market data
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 美股正常收盘后更新；北京时间通常为次日 06:20。
+    - cron: "20 22 * * 1-5"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-market-data
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Refresh latest available closes
+        run: node scripts/update-market.mjs
+
+      - name: Commit changed market file
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/market-latest.json
+          if git diff --cached --quiet; then
+            echo "No market-data change."
+          else
+            git commit -m "chore: refresh latest market closes"
+            git push
+          fi
