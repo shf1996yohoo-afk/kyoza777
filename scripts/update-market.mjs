@@ -96,7 +96,9 @@ function normalizeChart(ticker, marketSymbol, json) {
   const points = [];
   for (let index = 0; index < Math.min(timestamps.length, rawCloses.length); index++) {
     const close = Number(rawCloses[index]);
-    if (!Number.isFinite(close)) continue;
+    // 行情源偶尔会在停牌、公司行动或接口抖动时返回 0。零价会制造
+    // -100% 假信号并污染均线，因此必须在任何计算前剔除。
+    if (!Number.isFinite(close) || close <= 0) continue;
     points.push({
       date: new Date(Number(timestamps[index]) * 1000).toISOString().slice(0, 10),
       close
@@ -141,9 +143,11 @@ function normalizeChart(ticker, marketSymbol, json) {
 }
 
 function buildDailyBrief(allQuotes) {
-  const rows = Object.values(allQuotes).filter((quote) =>
+  const allRows = Object.values(allQuotes).filter((quote) =>
     Number.isFinite(Number(quote.last)) && Number.isFinite(Number(quote.chg_pct))
   );
+  const suspicious = allRows.filter((quote) => Math.abs(Number(quote.chg_pct)) > 35);
+  const rows = allRows.filter((quote) => Math.abs(Number(quote.chg_pct)) <= 35);
   if (!rows.length) return null;
 
   const dates = rows.map((quote) => quote.asof).filter(Boolean).sort();
@@ -227,12 +231,21 @@ function buildDailyBrief(allQuotes) {
     deduped.push(publicItem);
   });
 
-  const items = [{
+  const items = [];
+  if (suspicious.length) {
+    items.push({
+      tag: "数据校验",
+      priority: "高",
+      tickers: suspicious.map((quote) => quote.ticker),
+      text: `${suspicious.map((quote) => `${quote.ticker} ${signedPct(quote.chg_pct)}`).join("、")} 超过单日 ±35% 质量阈值，已从市场宽度与交易信号中隔离，等待人工核验。`
+    });
+  }
+  items.push({
     tag: "市场宽度",
     priority: Math.abs(averageChange) >= 1.5 ? "中" : "观察",
     tickers: [],
     text: `覆盖 ${rows.length} 个标的：${up} 涨 / ${down} 跌 / ${flat} 平，等权平均 ${signedPct(averageChange)}；领涨 ${leader.ticker} ${signedPct(leader.chg_pct)}，领跌 ${laggard.ticker} ${signedPct(laggard.chg_pct)}。`
-  }, ...deduped];
+  }, ...deduped);
 
   if (deduped.length === 0) {
     items.push({
