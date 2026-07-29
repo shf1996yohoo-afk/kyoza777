@@ -22,7 +22,14 @@ const symbols = {
   ETN: "ETN",
   VRT: "VRT",
   NOW: "NOW",
-  DDOG: "DDOG"
+  DDOG: "DDOG",
+  SOXX: "SOXX",
+  QQQ: "QQQ",
+  SMH: "SMH",
+  GRID: "GRID",
+  "159819.SZ": "159819.SZ",
+  "515980.SS": "515980.SS",
+  "515880.SS": "515880.SS"
 };
 
 const round = (value, digits = 2) => {
